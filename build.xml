@@ -41,12 +41,34 @@
 			</manifest>
 		</jar>
 	</target>
+
+	<target name="plot.jar" depends="compile">
+		<unzip dest="build">
+			<fileset dir="lib" casesensitive="false">
+				<include name="**/*.jar" />
+			</fileset>
+		</unzip>
+		<delete dir="build/META-INF"/>
+		<jar destfile="plot.jar" basedir="build" index="true">
+			<manifest>
+				<attribute name="Main-Class" value="pt.lsts.imc.ImcProxyPlot"/>
+			</manifest>
+		</jar>
+	</target>
 	
 	<target name="imcproxy" depends="client.jar" description="Compile proxy client for Unix systems">
 		<exec command="bash">
 			<arg value="utils/jar2sh.sh"/>
 			<arg value="imcproxy"/>
 			<arg value="client.jar"/>
+		</exec>
+	</target>
+
+	<target name="imcplot" depends="plot.jar" description="Compile proxy plot for Unix systems">
+		<exec command="bash">
+			<arg value="utils/jar2sh.sh"/>
+			<arg value="imcplot"/>
+			<arg value="plot.jar"/>
 		</exec>
 	</target>
 	
@@ -58,6 +80,6 @@
 		</exec>
 	</target>
 	
-	<target name="dist" depends="client.jar,server.jar"/>
+	<target name="dist" depends="client.jar,plot.jar,server.jar"/>
 	
 </project>

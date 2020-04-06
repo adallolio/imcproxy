@@ -7,6 +7,12 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.websocket.api.Session;
@@ -20,7 +26,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 @WebSocket(maxMessageSize = 64 * 1024)
 public class ImcProxyServer {
-
+	
 	private static HashSet<Session> activeSessions = new HashSet<>();
 	private static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	
@@ -84,6 +90,7 @@ public class ImcProxyServer {
 	public void onMessage(Session session, IMCMessage message) {
 		console("Got " + message.getAbbrev() + " from "
 				+ session.getRemoteAddress());
+
 		try {
 			ByteBuffer buff = wrap(message);
 			
@@ -101,7 +108,7 @@ public class ImcProxyServer {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void console(String text) {
 		System.out.println(format.format(new Date())+text);
 	}
