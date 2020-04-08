@@ -44,13 +44,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
 
-public class PlotRelativeWind {
+public class PlotAbsoluteWind {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
-	static Vector<Double> angle = new Vector<Double>(); 
+	static Vector<Double> dir = new Vector<Double>(); 
 	static Vector<Double> speed = new Vector<Double>();
 	static Vector<Date> times = new Vector<Date>();
 	static Date prev_date = null;
@@ -78,7 +78,7 @@ public class PlotRelativeWind {
 
 		if(get_record)
 		{
-			System.out.println("RelativeWind record saved!");
+			System.out.println("AbsoluteWind record saved!");
 			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			
 			values = message.getValues();
@@ -99,39 +99,39 @@ public class PlotRelativeWind {
 				}
 				first_it = false;
 			}
-			if(angle.size() == max_size_100)
+			if(dir.size() == max_size_100)
 			{
 				for(int i=0;i<10;i++)
 				{
-					angle.remove(i);
+					dir.remove(i);
 					speed.remove(i);
 				}
 			}
-			angle.add(ang_speed.get(0));
+			dir.add(ang_speed.get(0));
 			speed.add(ang_speed.get(1));
 
 			times.add(curr_date);
 
-			System.out.println(angle.size() + " " + curr_date);
+			System.out.println(dir.size() + " " + curr_date);
 			//System.out.println(date);
 			prev_date = curr_date;
 		} else
-			System.out.println("EulerAngles discarded!");
+			System.out.println("AbsoluteWind discarded!");
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit[1], frequency[1]);
 
 		if(plot)
 		{
 			System.out.println("Generating plot!");
-			System.out.println(angle.size() + " " + speed.size() + " " + times.size());
+			System.out.println(dir.size() + " " + speed.size() + " " + times.size());
 
 			int numCharts = 2;
-			String[] titles = {"Relative Wind Angle","Relative Wind Speed"};
+			String[] titles = {"Absolute Wind Direction","Absolute Wind Speed"};
 			String[] y_axes = {"degrees","m/s"};
-			String[] legend = {"angle","speed"};
+			String[] legend = {"dir","speed"};
 
 			Vector<Vector<Double>> total = new Vector<Vector<Double>>();
-			total.add(angle);
+			total.add(dir);
 			total.add(speed);
 
 			/*List<XYChart> charts = new ArrayList<XYChart>();
@@ -154,7 +154,7 @@ public class PlotRelativeWind {
 				charts.add(chart);
 			}
 			try {
-			PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/RelativeWind");
+			PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/AbsoluteWind");
 			} catch (IOException e) {
 			e.printStackTrace();
 			}

@@ -42,13 +42,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
 
-public class PlotVoltage {
+public class PlotTemperature {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
-	static Vector<Double> voltage = new Vector<Double>(); 
+	static Vector<Double> temperature = new Vector<Double>(); 
 	static Vector<Date> times = new Vector<Date>();
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
@@ -67,7 +67,7 @@ public class PlotVoltage {
 
 		String date_title = format_title.format(message.getDate());
 		String date_x_axis = format_x_axis.format(message.getDate());
-		System.out.println("Voltage record saved!");
+		System.out.println("Temperature record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
@@ -75,11 +75,11 @@ public class PlotVoltage {
 		String value;
 		Double value_d;
 
-		if(voltage.size() == max_size_100)
+		if(temperature.size() == max_size_100)
 		{
 			for(int i=0;i<10;i++)
 			{
-				voltage.remove(i);
+				temperature.remove(i);
 			}
 		}
 
@@ -88,21 +88,21 @@ public class PlotVoltage {
 			key = entry.getKey();
 			value = entry.getValue().toString();
 			value_d = Double.valueOf(value);
-			voltage.add(value_d);
+			temperature.add(value_d);
 		}
 
 		times.add(curr_date);
 
-		System.out.println(voltage.size() + " " + date_x_axis);
+		System.out.println(temperature.size() + " " + date_x_axis);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
 			System.out.println("Generating plot!");
-			System.out.println(voltage.size() + " " + times.size());
+			System.out.println(temperature.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("What Temperature? - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
@@ -113,11 +113,11 @@ public class PlotVoltage {
 			chart.getStyler().setPlotMargin(0);
 			chart.getStyler().setPlotContentSize(.95);
 
-			chart.addSeries("voltage", times, voltage);
+			chart.addSeries("temperature", times, temperature);
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Voltage", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Temperature", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

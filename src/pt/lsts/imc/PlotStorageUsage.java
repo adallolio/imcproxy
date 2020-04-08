@@ -51,7 +51,6 @@ public class PlotStorageUsage {
     // Storage Usage.
 	static Double available;
 	static Double used; 
-	static Date time = new Date();
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
@@ -93,10 +92,6 @@ public class PlotStorageUsage {
 			available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
 			used = storage.get(1);
 
-			time = curr_date;
-
-			System.out.println(available+"\n");
-
 			System.out.println("Generating plot!");
 			// Create Chart
 			PieChart chart = new PieChartBuilder().width(800).height(600).title("Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -105,7 +100,7 @@ public class PlotStorageUsage {
 			Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
     		chart.getStyler().setSeriesColors(sliceColors);
 
-			chart.addSeries("Used Storage", used);
+			chart.addSeries("Air Saturation", used);
 			chart.addSeries("Available ("+available+"Gb)", 100.0-used);
 			
 			// Save it

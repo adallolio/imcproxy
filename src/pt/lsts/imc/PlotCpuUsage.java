@@ -42,20 +42,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
 
-public class PlotVoltage {
+public class PlotCpuUsage {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
-	static Vector<Double> voltage = new Vector<Double>(); 
-	static Vector<Date> times = new Vector<Date>();
+	static Double cpu; 
+	static Date prev_date = null;
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
     static Integer frequency = 1;
-    
+
     static void plot(IMCMessage message){
 
 		boolean plot = false;
@@ -67,7 +67,7 @@ public class PlotVoltage {
 
 		String date_title = format_title.format(message.getDate());
 		String date_x_axis = format_x_axis.format(message.getDate());
-		System.out.println("Voltage record saved!");
+		System.out.println("CpuUsage record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
@@ -75,49 +75,32 @@ public class PlotVoltage {
 		String value;
 		Double value_d;
 
-		if(voltage.size() == max_size_100)
-		{
-			for(int i=0;i<10;i++)
-			{
-				voltage.remove(i);
-			}
-		}
-
 		for (Map.Entry<String, Object> entry : values.entrySet()) {
-			//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+			System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 			key = entry.getKey();
 			value = entry.getValue().toString();
 			value_d = Double.valueOf(value);
-			voltage.add(value_d);
+			cpu = value_d;
 		}
-
-		times.add(curr_date);
-
-		System.out.println(voltage.size() + " " + date_x_axis);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
 			System.out.println("Generating plot!");
-			System.out.println(voltage.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
+			PieChart chart = new PieChartBuilder().width(800).height(600).title("What PC Cpu Usage? - "+date_title+ " (last update "+date_x_axis+")").build();
 
 			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
+			Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
+    		chart.getStyler().setSeriesColors(sliceColors);
 
-			chart.addSeries("voltage", times, voltage);
+			chart.addSeries("O2 Saturation", cpu);
+			//chart.addSeries("", 100.0-air);
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Voltage", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/home/autonaut/CpuUsage", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;
@@ -146,6 +129,6 @@ public class PlotVoltage {
 		{
 			System.out.println("Date difference is negative!!");
 			return false;
-		}
-	}
+        }
+    }
 }

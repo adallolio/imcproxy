@@ -36,19 +36,21 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.*;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.PdfboxGraphicsEncoder;
+import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
 
-public class PlotVoltage {
+public class PlotEstimatedFreq {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
-	static Vector<Double> voltage = new Vector<Double>(); 
+	static Vector<Double> freq = new Vector<Double>(); 
 	static Vector<Date> times = new Vector<Date>();
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
@@ -67,7 +69,7 @@ public class PlotVoltage {
 
 		String date_title = format_title.format(message.getDate());
 		String date_x_axis = format_x_axis.format(message.getDate());
-		System.out.println("Voltage record saved!");
+		System.out.println("EstimatedFreq record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
@@ -75,11 +77,11 @@ public class PlotVoltage {
 		String value;
 		Double value_d;
 
-		if(voltage.size() == max_size_100)
+		if(freq.size() == max_size_100)
 		{
 			for(int i=0;i<10;i++)
 			{
-				voltage.remove(i);
+				freq.remove(i);
 			}
 		}
 
@@ -88,21 +90,21 @@ public class PlotVoltage {
 			key = entry.getKey();
 			value = entry.getValue().toString();
 			value_d = Double.valueOf(value);
-			voltage.add(value_d);
+			freq.add(value_d);
 		}
 
 		times.add(curr_date);
 
-		System.out.println(voltage.size() + " " + date_x_axis);
+		System.out.println(freq.size() + " " + date_x_axis);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
 			System.out.println("Generating plot!");
-			System.out.println(voltage.size() + " " + times.size());
+			System.out.println(freq.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Estimated Wave Encounter Frequency - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("rad/s").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
@@ -113,11 +115,11 @@ public class PlotVoltage {
 			chart.getStyler().setPlotMargin(0);
 			chart.getStyler().setPlotContentSize(.95);
 
-			chart.addSeries("voltage", times, voltage);
+			chart.addSeries("freq", times, freq);
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Voltage", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/home/autonaut/EstimatedFreq", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;
