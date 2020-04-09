@@ -89,7 +89,7 @@ public class ImcProxyServer {
 
 	public void onMessage(Session session, IMCMessage message) {
 		console("Got " + message.getAbbrev() + " from "
-				+ session.getRemoteAddress());
+				+ session.getRemoteAddress() + " (Entity Name " + message.getEntityName() + ")");
 
 		try {
 			ByteBuffer buff = wrap(message);
