@@ -119,7 +119,7 @@ public class PlotEstimatedFreq {
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/EstimatedFreq", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/estimatedfreq-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

@@ -117,7 +117,7 @@ public class PlotPower {
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Power", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/power-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

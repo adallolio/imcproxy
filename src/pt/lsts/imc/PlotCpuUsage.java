@@ -50,7 +50,10 @@ public class PlotCpuUsage {
 	static Integer max_size_100 = 100;
 	static Double cpu; 
 	static Date prev_date = null;
-	static Date prev_date_plot = null;
+	static Date prev_date_plot_l2 = null;
+	static Date prev_date_plot_l3 = null;
+	static int AutoNautL2 = 34819;
+	static int AutoNautL3 = 34820;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
@@ -59,51 +62,100 @@ public class PlotCpuUsage {
     static void plot(IMCMessage message){
 
 		boolean plot = false;
-
 		Date curr_date = message.getDate();
 
-		if(prev_date_plot == null)
-			prev_date_plot = curr_date;
-
-		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
-		System.out.println("CpuUsage record saved!");
-		Map<String, Object> values = new LinkedHashMap<String, Object>();
-		
-		values = message.getValues();
-		String key;
-		String value;
-		Double value_d;
-
-		for (Map.Entry<String, Object> entry : values.entrySet()) {
-			System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-			key = entry.getKey();
-			value = entry.getValue().toString();
-			value_d = Double.valueOf(value);
-			cpu = value_d;
-		}
-
-		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
-
-		if(plot)
+		if(message.getSrc() == AutoNautL2)
 		{
-			System.out.println("Generating plot!");
-			// Create Chart
-			PieChart chart = new PieChartBuilder().width(800).height(600).title("What PC Cpu Usage? - "+date_title+ " (last update "+date_x_axis+")").build();
+			if(prev_date_plot_l2 == null)
+				prev_date_plot_l2 = curr_date;
 
-			// Customize Chart
-			Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
-    		chart.getStyler().setSeriesColors(sliceColors);
-
-			chart.addSeries("O2 Saturation", cpu);
-			//chart.addSeries("", 100.0-air);
+			String date_title = format_title.format(message.getDate());
+			String date_x_axis = format_x_axis.format(message.getDate());
+			System.out.println("CpuUsage record saved!");
+			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/CpuUsage", BitmapFormat.PNG);
-			} catch(IOException e) {
+			values = message.getValues();
+			String key;
+			String value;
+			Double value_d;
+
+			for (Map.Entry<String, Object> entry : values.entrySet()) {
+				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+				key = entry.getKey();
+				value = entry.getValue().toString();
+				value_d = Double.valueOf(value);
+				cpu = value_d;
 			}
-			prev_date_plot = curr_date;
+
+			plot = checkDates(curr_date, prev_date_plot_l2, time_unit, frequency);
+
+			if(plot)
+			{
+				System.out.println("Generating plot!");
+				// Create Chart
+				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 2 Cpu Usage - "+date_title+ " (last update "+date_x_axis+")").build();
+
+				// Customize Chart
+				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
+				chart.getStyler().setSeriesColors(sliceColors);
+
+				chart.addSeries("CPU", cpu);
+				chart.addSeries("Available CPU", 100.0-cpu);
+				
+				// Save it
+				try {
+					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l2cpuusage-rt", BitmapFormat.PNG);
+				} catch(IOException e) {
+				}
+				prev_date_plot_l2 = curr_date;
+			}
+		} else if(message.getSrc() == AutoNautL3)
+		{
+			if(prev_date_plot_l3 == null)
+				prev_date_plot_l3 = curr_date;
+
+			String date_title = format_title.format(message.getDate());
+			String date_x_axis = format_x_axis.format(message.getDate());
+			System.out.println("CpuUsage from L3 saved!");
+			Map<String, Object> values = new LinkedHashMap<String, Object>();
+			
+			values = message.getValues();
+			String key;
+			String value;
+			Double value_d;
+
+			for (Map.Entry<String, Object> entry : values.entrySet()) {
+				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+				key = entry.getKey();
+				value = entry.getValue().toString();
+				value_d = Double.valueOf(value);
+				cpu = value_d;
+			}
+
+			plot = checkDates(curr_date, prev_date_plot_l3, time_unit, frequency);
+
+			if(plot)
+			{
+				System.out.println("Generating plot!");
+				// Create Chart
+				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 3 Cpu Usage - "+date_title+ " (last update "+date_x_axis+")").build();
+
+				// Customize Chart
+				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
+				chart.getStyler().setSeriesColors(sliceColors);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+
+				chart.addSeries("CPU", cpu);
+				chart.addSeries("Available CPU", 100.0-cpu);
+				
+				// Save it
+				try {
+					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l3cpuusage-rt", BitmapFormat.PNG);
+				} catch(IOException e) {
+				}
+				prev_date_plot_l3 = curr_date;
+			}
 		}
     }
     

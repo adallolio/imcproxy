@@ -51,7 +51,10 @@ public class PlotStorageUsage {
     // Storage Usage.
 	static Double available;
 	static Double used; 
-	static Date prev_date_plot = null;
+	static Date prev_date_plot_l2 = null;
+	static Date prev_date_plot_l3 = null;
+	static int AutoNautL2 = 34819;
+	static int AutoNautL3 = 34820;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
@@ -62,53 +65,108 @@ public class PlotStorageUsage {
 		boolean plot = false;
 		Date curr_date = message.getDate();
 
-		if(prev_date_plot == null)
-			prev_date_plot = curr_date;
-
-		plot = checkDates(curr_date, prev_date_plot, time_unit[1], frequency[1]);
-
-		if(plot)
+		if(message.getSrc() == AutoNautL2)
 		{
-			String date_title = format_title.format(message.getDate());
-			String date_x_axis = format_x_axis.format(message.getDate());
-			System.out.println("StorageUsage record saved!");
-			Map<String, Object> values = new LinkedHashMap<String, Object>();
-			
-			values = message.getValues();
-			//boolean first_it = true;
-			String key;
-			String value;
-			Double value_d;
-			ArrayList<Double> storage = new ArrayList<Double>();
+			if(prev_date_plot_l2 == null)
+				prev_date_plot_l2 = curr_date;
 
-			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-				key = entry.getKey();
-				value = entry.getValue().toString();
-				value_d = Double.valueOf(value);
-				storage.add(value_d);
+			plot = checkDates(curr_date, prev_date_plot_l2, time_unit[1], frequency[1]);
+
+			if(plot)
+			{
+				String date_title = format_title.format(message.getDate());
+				String date_x_axis = format_x_axis.format(message.getDate());
+				System.out.println("StorageUsage from L2 saved!");
+				Map<String, Object> values = new LinkedHashMap<String, Object>();
+				
+				values = message.getValues();
+				//boolean first_it = true;
+				String key;
+				String value;
+				Double value_d;
+				ArrayList<Double> storage = new ArrayList<Double>();
+
+				for (Map.Entry<String, Object> entry : values.entrySet()) {
+					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+					key = entry.getKey();
+					value = entry.getValue().toString();
+					value_d = Double.valueOf(value);
+					storage.add(value_d);
+				}
+
+				available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
+				used = storage.get(1);
+
+				System.out.println("Generating plot!");
+				// Create Chart
+				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 2 Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
+
+				// Customize Chart
+				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
+				chart.getStyler().setSeriesColors(sliceColors);
+
+				chart.addSeries("Used", used);
+				chart.addSeries("Available ("+available+"Gb)", 100.0-used);
+				
+				// Save it
+				try {
+					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l2storageusage-rt", BitmapFormat.PNG);
+				} catch(IOException e) {
+				}
+				prev_date_plot_l2 = curr_date;
 			}
+		} else if(message.getSrc() == AutoNautL3)
+		{
+			if(prev_date_plot_l3 == null)
+				prev_date_plot_l3 = curr_date;
 
-			available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
-			used = storage.get(1);
+			plot = checkDates(curr_date, prev_date_plot_l3, time_unit[1], frequency[1]);
 
-			System.out.println("Generating plot!");
-			// Create Chart
-			PieChart chart = new PieChartBuilder().width(800).height(600).title("Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
+			if(plot)
+			{
+				String date_title = format_title.format(message.getDate());
+				String date_x_axis = format_x_axis.format(message.getDate());
+				System.out.println("StorageUsage from L3 saved!");
+				Map<String, Object> values = new LinkedHashMap<String, Object>();
+				
+				values = message.getValues();
+				//boolean first_it = true;
+				String key;
+				String value;
+				Double value_d;
+				ArrayList<Double> storage = new ArrayList<Double>();
 
-			// Customize Chart
-			Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
-    		chart.getStyler().setSeriesColors(sliceColors);
+				for (Map.Entry<String, Object> entry : values.entrySet()) {
+					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+					key = entry.getKey();
+					value = entry.getValue().toString();
+					value_d = Double.valueOf(value);
+					storage.add(value_d);
+				}
 
-			chart.addSeries("Air Saturation", used);
-			chart.addSeries("Available ("+available+"Gb)", 100.0-used);
-			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/StorageUsage", BitmapFormat.PNG);
-			} catch(IOException e) {
+				available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
+				used = storage.get(1);
+
+				System.out.println("Generating plot!");
+				// Create Chart
+				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 3 Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
+
+				// Customize Chart
+				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
+				chart.getStyler().setSeriesColors(sliceColors);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+
+				chart.addSeries("Used", used);
+				chart.addSeries("Available ("+available+"Gb)", 100.0-used);
+				
+				// Save it
+				try {
+					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l3storageusage-rt", BitmapFormat.PNG);
+				} catch(IOException e) {
+				}
+				prev_date_plot_l3 = curr_date;
 			}
-			prev_date_plot = curr_date;
 		}
     }
     

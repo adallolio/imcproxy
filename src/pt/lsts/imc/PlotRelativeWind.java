@@ -36,7 +36,13 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.*;
 import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.PdfboxGraphicsEncoder;
+/*import org.knowm.xchart.PdfboxGraphicsEncoder;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.graphics.form.PDFormXObject;
+import de.rototor.pdfbox.graphics2d.PdfBoxGraphics2D;*/
 import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
@@ -82,22 +88,17 @@ public class PlotRelativeWind {
 			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			
 			values = message.getValues();
-			boolean first_it = true;
 			String key;
 			String value;
 			Double value_d;
 			ArrayList<Double> ang_speed = new ArrayList<Double>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				if(!first_it)
-				{
-					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-					key = entry.getKey();
-					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					ang_speed.add(value_d);
-				}
-				first_it = false;
+				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+				key = entry.getKey();
+				value = entry.getValue().toString();
+				value_d = Double.valueOf(value);
+				ang_speed.add(value_d);
 			}
 			if(angle.size() == max_size_100)
 			{
@@ -116,7 +117,7 @@ public class PlotRelativeWind {
 			//System.out.println(date);
 			prev_date = curr_date;
 		} else
-			System.out.println("EulerAngles discarded!");
+			System.out.println("RelativeWind discarded!");
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit[1], frequency[1]);
 
@@ -134,42 +135,26 @@ public class PlotRelativeWind {
 			total.add(angle);
 			total.add(speed);
 
-			/*List<XYChart> charts = new ArrayList<XYChart>();
+			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
-				//chart.getStyler().setYAxisMin(-10);
-				//chart.getStyler().setYAxisMax(10);
-				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
-				series.setMarker(SeriesMarkers.NONE);
-				charts.add(chart);
-			}*/
-
-			List<Chart> charts = new ArrayList<>();
-			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
-				//chart.getStyler().setYAxisMin(-10);
-				//chart.getStyler().setYAxisMax(10);
+				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(800).height(500).build();
+				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
+				chart.getStyler().setChartTitleVisible(true);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+				chart.getStyler().setYAxisDecimalPattern("##.##");
+				chart.getStyler().setPlotMargin(0);
+				chart.getStyler().setPlotContentSize(.95);
 				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
 				series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}
+
 			try {
-			PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/RelativeWind");
+				BitmapEncoder.saveBitmap(charts, 2, 1, "/var/www/dokuwiki/data/media/relativewind-rt", BitmapEncoder.BitmapFormat.PNG);
 			} catch (IOException e) {
-			e.printStackTrace();
+				e.printStackTrace();
 			}
-
-			// Save it
-			//try {
-			//	PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/RelativeWind");
-			//} catch(IOException e) {
-			//}
-			
-			// Save it
-			//try {
-			//	BitmapEncoder.saveBitmap(charts, 1, 2, "/home/autonaut/RelativeWind", BitmapFormat.PNG);
-			//} catch(IOException e) {
-			//}
 			
 			prev_date_plot = curr_date;
 		}

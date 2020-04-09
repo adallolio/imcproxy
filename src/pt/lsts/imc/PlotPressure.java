@@ -117,7 +117,7 @@ public class PlotPressure {
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Pressure", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/pressure-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

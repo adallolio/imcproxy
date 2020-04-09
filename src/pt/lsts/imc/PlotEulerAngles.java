@@ -36,6 +36,7 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.*;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
@@ -131,27 +132,33 @@ public class PlotEulerAngles {
 		{
 			System.out.println("Generating plot!");
 			System.out.println(phi.size() + " " + theta.size() + " " + psi.size() + " " + psim.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Euler Angles - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("rad").build();
+			int numCharts = 3;
+			String[] titles = {"Euler Angles - x axis","Euler Angles - y axis", "Euler Angles - z axis"};
+			String y_axes = "rad";
+			String[] legend = {"phi","theta","psi","psi_magn"};
 
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
-
-			chart.addSeries("phi", times, phi);
-			chart.addSeries("theta", times, theta);
-			chart.addSeries("psi", times, psi);
-			chart.addSeries("psi_m", times, psim);
+			Vector<Vector<Double>> total = new Vector<Vector<Double>>();
+			total.add(phi);
+			total.add(theta);
+			total.add(psi);
+			total.add(psim);
 			
-			// Save it
+			List<Chart> charts = new ArrayList<Chart>();
+			for (int i = 0; i < numCharts; i++) {
+				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
+				//chart.getStyler().setYAxisMin(-10);
+				//chart.getStyler().setYAxisMax(10);
+				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
+				if(i==2)
+					chart.addSeries(legend[i+1], null, total.get(i+1));
+				series.setMarker(SeriesMarkers.NONE);
+				charts.add(chart);
+			}
+
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/AngularVelocity", BitmapFormat.PNG);
-			} catch(IOException e) {
+				BitmapEncoder.saveBitmap(charts, 3, 1, "/var/www/dokuwiki/data/media/eulerangles-rt", BitmapEncoder.BitmapFormat.PNG);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 			prev_date_plot = curr_date;
 		}

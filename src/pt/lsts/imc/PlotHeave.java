@@ -119,7 +119,7 @@ public class PlotHeave {
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Heave", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/heave-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

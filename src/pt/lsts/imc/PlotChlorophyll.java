@@ -117,7 +117,7 @@ public class PlotChlorophyll {
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/Chlorophyll", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/chlorophyll-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

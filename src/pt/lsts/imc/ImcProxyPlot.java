@@ -36,6 +36,8 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.*;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.PdfboxGraphicsEncoder;
+import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
@@ -83,16 +85,17 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			//console("The message is from AutoNaut!");
 			saveMessage(message);
-		} else
+		} /*else
 		{
 			console("MESSAGE from Neptus!");
-			String url_string = Tiles.getTileURL(63.427048d, 10.377523d, 10);
+			String url_string = Tiles.getTileURL(63.407048d, 10.377523d, 15);
 			try {
 				URL url = new URL(url_string);
 				Tiles.downloadTile(url, "/home/autonaut/tile");
 			} catch(IOException e) {
+				System.out.println(e.getMessage());
 			}
-		}
+		}*/
 
 
 		// Fred Comment:
@@ -112,8 +115,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 
 		if(temp.equals("Acceleration"))
 		{
-			//console("Acceleration received");
-			//PlotAcceleration.plot(message);
+			console("Acceleration received");
+			PlotAcceleration.plot(message);
 		} else if(temp.equals("AngularVelocity"))
 		{
 			//console("AngularVelocity received from " + entity);
@@ -132,8 +135,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
 		} else if(temp.equals("RelativeWind"))
 		{
-			//console("RelativeWind received");
-			//PlotRelativeWind.plot(message);
+			console("RelativeWind received");
+			PlotRelativeWind.plot(message);
 		} else if(temp.equals("AirSaturation"))
 		{
 			//console("AirSaturation received");

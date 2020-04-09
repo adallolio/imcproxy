@@ -82,22 +82,17 @@ public class PlotAbsoluteWind {
 			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			
 			values = message.getValues();
-			boolean first_it = true;
 			String key;
 			String value;
 			Double value_d;
 			ArrayList<Double> ang_speed = new ArrayList<Double>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				if(!first_it)
-				{
-					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-					key = entry.getKey();
-					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					ang_speed.add(value_d);
-				}
-				first_it = false;
+				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+				key = entry.getKey();
+				value = entry.getValue().toString();
+				value_d = Double.valueOf(value);
+				ang_speed.add(value_d);
 			}
 			if(dir.size() == max_size_100)
 			{
@@ -134,43 +129,25 @@ public class PlotAbsoluteWind {
 			total.add(dir);
 			total.add(speed);
 
-			/*List<XYChart> charts = new ArrayList<XYChart>();
+			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
 				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
-				//chart.getStyler().setYAxisMin(-10);
-				//chart.getStyler().setYAxisMax(10);
-				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
-				series.setMarker(SeriesMarkers.NONE);
-				charts.add(chart);
-			}*/
-
-			List<Chart> charts = new ArrayList<>();
-			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
-				//chart.getStyler().setYAxisMin(-10);
-				//chart.getStyler().setYAxisMax(10);
+				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
+				chart.getStyler().setChartTitleVisible(true);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+				chart.getStyler().setYAxisDecimalPattern("##.##");
+				chart.getStyler().setPlotMargin(0);
+				chart.getStyler().setPlotContentSize(.95);
 				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
 				series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}
 			try {
-			PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/AbsoluteWind");
+				BitmapEncoder.saveBitmap(charts, 2, 1, "/var/www/dokuwiki/data/media/absolutewind-rt", BitmapEncoder.BitmapFormat.PNG);
 			} catch (IOException e) {
 			e.printStackTrace();
-			}
-
-			// Save it
-			//try {
-			//	PdfboxGraphicsEncoder.savePdfboxGraphics(charts, "/home/autonaut/RelativeWind");
-			//} catch(IOException e) {
-			//}
-			
-			// Save it
-			//try {
-			//	BitmapEncoder.saveBitmap(charts, 1, 2, "/home/autonaut/RelativeWind", BitmapFormat.PNG);
-			//} catch(IOException e) {
-			//}
-			
+			}			
 			prev_date_plot = curr_date;
 		}
     }

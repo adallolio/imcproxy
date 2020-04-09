@@ -93,14 +93,16 @@ public class PlotAirSaturation {
 
 			// Customize Chart
 			Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
-    		chart.getStyler().setSeriesColors(sliceColors);
+			chart.getStyler().setSeriesColors(sliceColors);
+			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
 
 			chart.addSeries("O2 Saturation", air);
-			//chart.addSeries("", 100.0-air);
+			chart.addSeries("", 100.0-air);
 			
 			// Save it
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/AirSaturation", BitmapFormat.PNG);
+				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/airsaturation-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
 			prev_date_plot = curr_date;

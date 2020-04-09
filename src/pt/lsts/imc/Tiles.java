@@ -44,8 +44,8 @@ import java.awt.Color;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class Tiles {
    //int zoom = 10;
@@ -65,15 +65,14 @@ public class Tiles {
       ytile=((1<<zoom)-1);
       
       System.out.println("https://tile.openstreetmap.org/" + zoom + "/" + xtile + "/" + ytile + ".png");
-      return("" + zoom + "/" + xtile + "/" + ytile);
+      return("https://tile.openstreetmap.org/" + zoom + "/" + xtile + "/" + ytile);
    }
 
-   public static void downloadTile(URL url, String outputFileName) throws IOException {
-		try(InputStream in = url.openStream();
-			ReadableByteChannel rbc = Channels.newChannel(in);
-			FileOutputStream fos = new FileOutputStream(outputFileName))
-		{
-			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
-		}
+   public static void downloadTile(URL url, String fileName) throws IOException {
+      System.out.println("Downloading...");
+      try (InputStream in = url.openStream()) {
+         Files.copy(in, Paths.get(fileName));
+      }
+      System.out.println("Done");
 	}
 }

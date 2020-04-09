@@ -36,6 +36,7 @@ import org.knowm.xchart.*;
 import org.knowm.xchart.BitmapEncoder.BitmapFormat;
 import org.knowm.xchart.XYSeries.*;
 import org.knowm.xchart.XYChartBuilder;
+import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
@@ -127,26 +128,36 @@ public class PlotAngularVelocity {
 		{
 			System.out.println("Generating plot!");
 			System.out.println(x.size() + " " + y.size() + " " + z.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Angular Velocity - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("rad/s").build();
-
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
-
-			chart.addSeries("x", times, x);
-			chart.addSeries("y", times, y);
-			chart.addSeries("z", times, z);
 			
-			// Save it
+			int numCharts = 3;
+			String[] titles = {"Angular Velocity - x axis","Angular Velocity - y axis", "Angular Velocity - z axis"};
+			String y_axes = "rad/s";
+			String legend = "angvel";
+
+			Vector<Vector<Double>> total = new Vector<Vector<Double>>();
+			total.add(x);
+			total.add(y);
+			total.add(z);
+			
+			List<Chart> charts = new ArrayList<Chart>();
+			for (int i = 0; i < numCharts; i++) {
+				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
+				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
+				chart.getStyler().setChartTitleVisible(true);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+				chart.getStyler().setYAxisDecimalPattern("##.##");
+				chart.getStyler().setPlotMargin(0);
+				chart.getStyler().setPlotContentSize(.95);
+				XYSeries series = chart.addSeries(legend, null, total.get(i));
+				series.setMarker(SeriesMarkers.NONE);
+				charts.add(chart);
+			}
+
 			try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/AngularVelocity", BitmapFormat.PNG);
-			} catch(IOException e) {
+				BitmapEncoder.saveBitmap(charts, 3, 1, "/home/autonaut/AngularVelocity", BitmapEncoder.BitmapFormat.PNG);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 			prev_date_plot = curr_date;
 		}
