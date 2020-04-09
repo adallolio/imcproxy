@@ -76,12 +76,14 @@ public class PlotDissolvedOrganicMatter {
 		String key;
 		String value;
 		Double value_d;
+		ArrayList<Double> ddom = new ArrayList<Double>();
 
 		if(dom.size() == max_size_100)
 		{
 			for(int i=0;i<10;i++)
 			{
 				dom.remove(i);
+				times.remove(i);
 			}
 		}
 
@@ -90,12 +92,14 @@ public class PlotDissolvedOrganicMatter {
 			key = entry.getKey();
 			value = entry.getValue().toString();
 			value_d = Double.valueOf(value);
-			dom.add(value_d);
+			ddom.add(value_d);
 		}
+
+		dom.add(ddom.get(0));
 
 		times.add(curr_date);
 
-		System.out.println(dom.size() + " " + date_x_axis);
+		System.out.println(ddom.get(0) + " " + date_x_axis);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
@@ -111,7 +115,7 @@ public class PlotDissolvedOrganicMatter {
 			chart.getStyler().setChartTitleVisible(true);
 			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
+			//chart.getStyler().setYAxisDecimalPattern("##.##");
 			chart.getStyler().setPlotMargin(0);
 			chart.getStyler().setPlotContentSize(.95);
 

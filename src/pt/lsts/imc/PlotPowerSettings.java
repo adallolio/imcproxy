@@ -111,6 +111,7 @@ public class PlotPowerSettings {
                     modem.remove(i);
                     pumps.remove(i);
                     vhf.remove(i);
+			times.remove(i);
 				}
 			}
 			l2.add(settings.get(0));

@@ -108,6 +108,7 @@ public class PlotAngularVelocity {
 					x.remove(i);
 					y.remove(i);
 					y.remove(i);
+					times.remove(i);
 				}
 			}
 			x.add(xyz.get(0));
@@ -149,8 +150,8 @@ public class PlotAngularVelocity {
 				chart.getStyler().setYAxisDecimalPattern("##.##");
 				chart.getStyler().setPlotMargin(0);
 				chart.getStyler().setPlotContentSize(.95);
-				XYSeries series = chart.addSeries(legend, null, total.get(i));
-				series.setMarker(SeriesMarkers.NONE);
+				XYSeries series = chart.addSeries(legend, times, total.get(i));
+				//series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}
 

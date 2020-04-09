@@ -104,7 +104,7 @@ public class PlotStorageUsage {
 				// Customize Chart
 				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
 				chart.getStyler().setSeriesColors(sliceColors);
-
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 				chart.addSeries("Used", used);
 				chart.addSeries("Available ("+available+"Gb)", 100.0-used);
 				

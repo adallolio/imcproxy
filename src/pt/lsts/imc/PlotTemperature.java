@@ -80,6 +80,7 @@ public class PlotTemperature {
 			for(int i=0;i<10;i++)
 			{
 				temperature.remove(i);
+				times.remove(i);
 			}
 		}
 

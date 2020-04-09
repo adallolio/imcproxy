@@ -82,6 +82,7 @@ public class PlotEstimatedFreq {
 			for(int i=0;i<10;i++)
 			{
 				freq.remove(i);
+				times.remove(i);
 			}
 		}
 

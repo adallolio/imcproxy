@@ -80,6 +80,7 @@ public class PlotSoundSpeed {
 			for(int i=0;i<10;i++)
 			{
 				sspeed.remove(i);
+				times.remove(i);
 			}
 		}
 

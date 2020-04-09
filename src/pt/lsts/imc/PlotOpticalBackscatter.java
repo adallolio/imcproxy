@@ -82,6 +82,7 @@ public class PlotOpticalBackscatter {
 			for(int i=0;i<10;i++)
 			{
 				bs.remove(i);
+				times.remove(i);
 			}
 		}
 

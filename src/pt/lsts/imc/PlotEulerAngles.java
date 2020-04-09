@@ -111,6 +111,7 @@ public class PlotEulerAngles {
 					theta.remove(i);
 					psi.remove(i);
 					psim.remove(i);
+					times.remove(i);
 				}
 			}
 			phi.add(phi_theta_psi_psim.get(0));
@@ -146,12 +147,17 @@ public class PlotEulerAngles {
 			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
 				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
-				//chart.getStyler().setYAxisMin(-10);
-				//chart.getStyler().setYAxisMax(10);
-				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
+				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
+				chart.getStyler().setChartTitleVisible(true);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
+				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
+				chart.getStyler().setYAxisDecimalPattern("##.##");
+				chart.getStyler().setPlotMargin(0);
+				chart.getStyler().setPlotContentSize(.95);
+				chart.addSeries(legend[i], times, total.get(i));
 				if(i==2)
-					chart.addSeries(legend[i+1], null, total.get(i+1));
-				series.setMarker(SeriesMarkers.NONE);
+					chart.addSeries(legend[i+1], times, total.get(i+1));
+				//series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}
 

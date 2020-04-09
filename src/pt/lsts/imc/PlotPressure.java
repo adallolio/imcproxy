@@ -80,6 +80,7 @@ public class PlotPressure {
 			for(int i=0;i<10;i++)
 			{
 				pressure.remove(i);
+				times.remove(i);
 			}
 		}
 

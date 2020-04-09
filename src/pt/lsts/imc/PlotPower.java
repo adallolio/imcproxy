@@ -80,6 +80,7 @@ public class PlotPower {
 			for(int i=0;i<10;i++)
 			{
 				power.remove(i);
+				times.remove(i);
 			}
 		}
 

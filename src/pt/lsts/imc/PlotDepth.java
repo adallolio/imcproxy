@@ -80,6 +80,7 @@ public class PlotDepth {
 			for(int i=0;i<10;i++)
 			{
 				depth.remove(i);
+				times.remove(i);
 			}
 		}
 

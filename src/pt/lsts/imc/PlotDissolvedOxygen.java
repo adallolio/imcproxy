@@ -80,6 +80,7 @@ public class PlotDissolvedOxygen {
 			for(int i=0;i<10;i++)
 			{
 				oxygen.remove(i);
+				times.remove(i);
 			}
 		}
 

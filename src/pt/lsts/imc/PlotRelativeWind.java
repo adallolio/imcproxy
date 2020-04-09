@@ -106,6 +106,7 @@ public class PlotRelativeWind {
 				{
 					angle.remove(i);
 					speed.remove(i);
+					times.remove(i);
 				}
 			}
 			angle.add(ang_speed.get(0));
@@ -145,7 +146,7 @@ public class PlotRelativeWind {
 				chart.getStyler().setYAxisDecimalPattern("##.##");
 				chart.getStyler().setPlotMargin(0);
 				chart.getStyler().setPlotContentSize(.95);
-				XYSeries series = chart.addSeries(legend[i], null, total.get(i));
+				XYSeries series = chart.addSeries(legend[i], times, total.get(i));
 				series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}

@@ -68,29 +68,29 @@ public class PlotCpuUsage {
 		{
 			if(prev_date_plot_l2 == null)
 				prev_date_plot_l2 = curr_date;
-
-			String date_title = format_title.format(message.getDate());
-			String date_x_axis = format_x_axis.format(message.getDate());
-			System.out.println("CpuUsage record saved!");
-			Map<String, Object> values = new LinkedHashMap<String, Object>();
 			
-			values = message.getValues();
-			String key;
-			String value;
-			Double value_d;
-
-			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-				key = entry.getKey();
-				value = entry.getValue().toString();
-				value_d = Double.valueOf(value);
-				cpu = value_d;
-			}
-
 			plot = checkDates(curr_date, prev_date_plot_l2, time_unit, frequency);
 
 			if(plot)
 			{
+				String date_title = format_title.format(message.getDate());
+				String date_x_axis = format_x_axis.format(message.getDate());
+				System.out.println("CpuUsage record saved!");
+				Map<String, Object> values = new LinkedHashMap<String, Object>();
+				
+				values = message.getValues();
+				String key;
+				String value;
+				Double value_d;
+
+				for (Map.Entry<String, Object> entry : values.entrySet()) {
+					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+					key = entry.getKey();
+					value = entry.getValue().toString();
+					value_d = Double.valueOf(value);
+					cpu = value_d;
+				}
+		
 				System.out.println("Generating plot!");
 				// Create Chart
 				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 2 Cpu Usage - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -98,9 +98,10 @@ public class PlotCpuUsage {
 				// Customize Chart
 				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
 				chart.getStyler().setSeriesColors(sliceColors);
+				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 
-				chart.addSeries("CPU", cpu);
-				chart.addSeries("Available CPU", 100.0-cpu);
+				chart.addSeries("Used", cpu);
+				chart.addSeries("Available", 100.0-cpu);
 				
 				// Save it
 				try {
@@ -114,28 +115,29 @@ public class PlotCpuUsage {
 			if(prev_date_plot_l3 == null)
 				prev_date_plot_l3 = curr_date;
 
-			String date_title = format_title.format(message.getDate());
-			String date_x_axis = format_x_axis.format(message.getDate());
-			System.out.println("CpuUsage from L3 saved!");
-			Map<String, Object> values = new LinkedHashMap<String, Object>();
-			
-			values = message.getValues();
-			String key;
-			String value;
-			Double value_d;
-
-			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-				key = entry.getKey();
-				value = entry.getValue().toString();
-				value_d = Double.valueOf(value);
-				cpu = value_d;
-			}
-
 			plot = checkDates(curr_date, prev_date_plot_l3, time_unit, frequency);
 
 			if(plot)
 			{
+
+				String date_title = format_title.format(message.getDate());
+				String date_x_axis = format_x_axis.format(message.getDate());
+				System.out.println("CpuUsage from L3 saved!");
+				Map<String, Object> values = new LinkedHashMap<String, Object>();
+				
+				values = message.getValues();
+				String key;
+				String value;
+				Double value_d;
+
+				for (Map.Entry<String, Object> entry : values.entrySet()) {
+					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
+					key = entry.getKey();
+					value = entry.getValue().toString();
+					value_d = Double.valueOf(value);
+					cpu = value_d;
+				}
+			
 				System.out.println("Generating plot!");
 				// Create Chart
 				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 3 Cpu Usage - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -146,8 +148,8 @@ public class PlotCpuUsage {
 				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 				//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
 
-				chart.addSeries("CPU", cpu);
-				chart.addSeries("Available CPU", 100.0-cpu);
+				chart.addSeries("Used", cpu);
+				chart.addSeries("Available", 100.0-cpu);
 				
 				// Save it
 				try {

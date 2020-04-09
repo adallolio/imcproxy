@@ -80,6 +80,7 @@ public class PlotChlorophyll {
 			for(int i=0;i<10;i++)
 			{
 				chlorophyll.remove(i);
+				times.remove(i);
 			}
 		}
 

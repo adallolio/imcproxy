@@ -82,6 +82,7 @@ public class PlotHeave {
 			for(int i=0;i<10;i++)
 			{
 				heave.remove(i);
+				times.remove(i);
 			}
 		}
 

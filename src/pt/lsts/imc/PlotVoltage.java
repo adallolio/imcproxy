@@ -80,6 +80,7 @@ public class PlotVoltage {
 			for(int i=0;i<10;i++)
 			{
 				voltage.remove(i);
+				times.remove(i);
 			}
 		}
 

@@ -80,6 +80,7 @@ public class PlotSalinity {
 			for(int i=0;i<10;i++)
 			{
 				salinity.remove(i);
+				times.remove(i);
 			}
 		}
 

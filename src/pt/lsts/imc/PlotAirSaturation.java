@@ -97,8 +97,8 @@ public class PlotAirSaturation {
 			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
 
-			chart.addSeries("O2 Saturation", air);
-			chart.addSeries("", 100.0-air);
+			chart.addSeries("O2 Saturation ("+air+"%)", air);
+			//chart.addSeries("", 100.0-air);
 			
 			// Save it
 			try {

@@ -80,6 +80,7 @@ public class PlotConductivity {
 			for(int i=0;i<10;i++)
 			{
 				conductivity.remove(i);
+				times.remove(i);
 			}
 		}
 
