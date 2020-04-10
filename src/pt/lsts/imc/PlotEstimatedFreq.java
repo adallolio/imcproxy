@@ -105,7 +105,7 @@ public class PlotEstimatedFreq {
 			System.out.println("Generating plot!");
 			System.out.println(freq.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Estimated Wave Encounter Frequency - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("rad/s").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Estimated Wave Encounter Frequency - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("rad/s").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

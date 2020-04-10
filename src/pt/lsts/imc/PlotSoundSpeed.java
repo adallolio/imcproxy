@@ -103,7 +103,7 @@ public class PlotSoundSpeed {
 			System.out.println("Generating plot!");
 			System.out.println(sspeed.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Sound Speed - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("m/s").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Sound Speed - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("m/s").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

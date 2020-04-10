@@ -103,7 +103,7 @@ public class PlotVoltage {
 			System.out.println("Generating plot!");
 			System.out.println(voltage.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("V").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

@@ -132,7 +132,7 @@ public class PlotAbsoluteWind {
 
 			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
+				XYChart chart = new XYChartBuilder().title(titles[i]+" - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle(y_axes[i]).width(600).height(400).build();
 				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
 				chart.getStyler().setChartTitleVisible(true);
 				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);

@@ -103,7 +103,7 @@ public class PlotPower {
 			System.out.println("Generating plot!");
 			System.out.println(power.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("What Power? - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("W").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("What Power? - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("W").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

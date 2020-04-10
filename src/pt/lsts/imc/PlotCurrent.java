@@ -103,7 +103,7 @@ public class PlotCurrent {
 			System.out.println("Generating plot!");
 			System.out.println(current.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Consumed Current - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("A").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Consumed Current - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("A").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

@@ -103,7 +103,7 @@ public class PlotConductivity {
 			System.out.println("Generating plot!");
 			System.out.println(conductivity.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Conductivity - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("µg/L").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Conductivity - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("µg/L").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

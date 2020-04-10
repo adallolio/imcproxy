@@ -103,7 +103,7 @@ public class PlotDissolvedOxygen {
 			System.out.println("Generating plot!");
 			System.out.println(oxygen.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Dissolved Oxygen - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("µM").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Dissolved Oxygen - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("µM").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

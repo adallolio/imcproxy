@@ -147,7 +147,7 @@ public class PlotEulerAngles {
 			
 			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
+				XYChart chart = new XYChartBuilder().title(titles[i]+" (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
 				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
 				chart.getStyler().setChartTitleVisible(true);
 				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);

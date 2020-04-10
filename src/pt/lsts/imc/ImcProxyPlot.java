@@ -55,17 +55,7 @@ public class ImcProxyPlot extends ImcClientSocket {
 												"StorageUsage", "Temperature", "Voltage");
 	public int AutoNautL2 = 34819;
 	public int AutoNautL3 = 34820;
-	public SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
-	public SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
-	// Maximum record vector size - moving window.
-	public Integer max_size_100 = 100;
-
-
-	
-
-
-	
 
 	public ImcProxyPlot(String serverHost, int serverPort) throws Exception {
 		connect(new URI("ws://"+serverHost+":"+serverPort));
@@ -85,23 +75,18 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			//console("The message is from AutoNaut!");
 			saveMessage(message);
-		} /*else
+		} else
 		{
 			console("MESSAGE from Neptus!");
-			String url_string = Tiles.getTileURL(63.407048d, 10.377523d, 15);
+			console(message.getSourceName());
+			/*String url_string = Tiles.getTileURL(63.407048d, 10.377523d, 15);
 			try {
 				URL url = new URL(url_string);
 				Tiles.downloadTile(url, "/home/autonaut/tile");
 			} catch(IOException e) {
 				System.out.println(e.getMessage());
-			}
-		}*/
-
-
-		// Fred Comment:
-		// This is where you filter messages either by msg.getMgid() only, or also imcid  - msg.getSrc() - returns imcid as int.
-		// After filtering and finding messages that should be plot -> send message to correct plotter (e.g one plotter function for EstimatedState, one for Velocity etc.)
-		
+			}*/
+		}	
 	}
 
 	public void saveMessage(IMCMessage message) {
@@ -123,20 +108,20 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotAngularVelocity.plot(message); // 2 entities from L2 - do not try.
 		} else if(temp.equals("EulerAngles"))
 		{
-			console("EulerAngles received");
-			PlotEulerAngles.plot(message);
+			//console("EulerAngles received");
+			//PlotEulerAngles.plot(message);
 		} else if(temp.equals("Voltage"))
 		{
-			console("Voltage received");
-			PlotVoltage.plot(message);
+			//console("Voltage received");
+			//PlotVoltage.plot(message);
 		} else if(temp.equals("StorageUsage"))
 		{
-			console("StorageUsage received");
-			PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
+			//console("StorageUsage received");
+			//PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
 		} else if(temp.equals("RelativeWind"))
 		{
-			console("RelativeWind received");
-			PlotRelativeWind.plot(message);
+			//console("RelativeWind received");
+			//PlotRelativeWind.plot(message);
 		} else if(temp.equals("AirSaturation"))
 		{
 			//console("AirSaturation received");
@@ -155,8 +140,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotConductivity.plot(message);
 		} else if(temp.equals("CpuUsage"))
 		{
-			console("CpuUsage received");
-			PlotCpuUsage.plot(message);
+			//console("CpuUsage received");
+			//PlotCpuUsage.plot(message);
 		} else if(temp.equals("Current"))
 		{
 			//console("Current received");
@@ -171,12 +156,12 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotDissolvedOrganicMatter.plot(message);
 		} else if(temp.equals("EstimatedFreq"))
 		{
-			console("EstimatedFreq received");
-			PlotEstimatedFreq.plot(message);
+			//console("EstimatedFreq received");
+			//PlotEstimatedFreq.plot(message);
 		} else if(temp.equals("Heave"))
 		{
-			console("Heave received");
-			PlotHeave.plot(message); // 2 entities from L2 - do not try.
+			//console("Heave received");
+			//PlotHeave.plot(message); // 2 entities from L2 - do not try.
 		} else if(temp.equals("OpticalBackscatter"))
 		{
 			//console("OpticalBackscatter received");
@@ -195,8 +180,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotPressure.plot(message);
 		} else if(temp.equals("AbsoluteWind"))
 		{
-			console("AbsoluteWind received");
-			PlotAbsoluteWind.plot(message);
+			//console("AbsoluteWind received");
+			//PlotAbsoluteWind.plot(message);
 		} else if(temp.equals("Salinity"))
 		{
 			//console("Salinity received");
@@ -212,7 +197,7 @@ public class ImcProxyPlot extends ImcClientSocket {
 		}
 
 	}
-			
+
 	public static void main(String[] args) throws Exception {
 		String host = "zpserver.info";
 		int port = 9090;

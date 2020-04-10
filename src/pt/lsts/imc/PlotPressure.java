@@ -103,7 +103,7 @@ public class PlotPressure {
 			System.out.println("Generating plot!");
 			System.out.println(pressure.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Pressure - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("hPa").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Pressure - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("hPa").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

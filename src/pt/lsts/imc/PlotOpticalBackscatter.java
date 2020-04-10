@@ -105,7 +105,7 @@ public class PlotOpticalBackscatter {
 			System.out.println("Generating plot!");
 			System.out.println(bs.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Optical Backscatter - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("1/m").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Optical Backscatter - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("1/m").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

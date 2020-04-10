@@ -108,7 +108,7 @@ public class PlotDissolvedOrganicMatter {
 			System.out.println("Generating plot!");
 			System.out.println(dom.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Colored Dissolved Organic Matter - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("PPB").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Colored Dissolved Organic Matter - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("PPB").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
