@@ -49,7 +49,7 @@ public class PlotAbsoluteWind {
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
+	static Integer max_size_1000 = 1000;
 	static Vector<Double> dir = new Vector<Double>(); 
 	static Vector<Double> speed = new Vector<Double>();
 	static Vector<Date> times = new Vector<Date>();
@@ -94,9 +94,9 @@ public class PlotAbsoluteWind {
 				value_d = Double.valueOf(value);
 				ang_speed.add(value_d);
 			}
-			if(dir.size() == max_size_100)
+			if(dir.size() == max_size_1000)
 			{
-				for(int i=0;i<10;i++)
+				for(int i=0;i<max_size_1000/10;i++)
 				{
 					dir.remove(i);
 					speed.remove(i);

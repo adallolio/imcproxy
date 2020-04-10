@@ -49,7 +49,7 @@ public class PlotOpticalBackscatter {
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
+	static Integer max_size_1000 = 1000;
 	static Vector<Double> bs = new Vector<Double>(); 
 	static Vector<Date> times = new Vector<Date>();
 	static Date prev_date_plot = null;
@@ -77,9 +77,9 @@ public class PlotOpticalBackscatter {
 		String value;
 		Double value_d;
 
-		if(bs.size() == max_size_100)
+		if(bs.size() == max_size_1000)
 		{
-			for(int i=0;i<10;i++)
+			for(int i=0;i<max_size_1000/10;i++)
 			{
 				bs.remove(i);
 				times.remove(i);
@@ -112,7 +112,7 @@ public class PlotOpticalBackscatter {
 			chart.getStyler().setChartTitleVisible(true);
 			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
 			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
+			chart.getStyler().setYAxisDecimalPattern("##.#####");
 			chart.getStyler().setPlotMargin(0);
 			chart.getStyler().setPlotContentSize(.95);
 

@@ -40,15 +40,16 @@ import org.knowm.xchart.internal.chartpart.Chart;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.awt.Color;
 
 public class PlotEulerAngles {
-    static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
+    	static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
-	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
+	// Maximum record vector size - moving window
+	static Integer max_size_1000 = 1000;
 	static Vector<Double> phi = new Vector<Double>(); 
 	static Vector<Double> theta = new Vector<Double>();
 	static Vector<Double> psi = new Vector<Double>();
@@ -103,9 +104,9 @@ public class PlotEulerAngles {
 				}
 				first_it = false;
 			}
-			if(phi.size() == max_size_100)
+			if(phi.size() == max_size_1000)
 			{
-				for(int i=0;i<10;i++)
+				for(int i=0;i<max_size_1000/10;i++)
 				{
 					phi.remove(i);
 					theta.remove(i);
@@ -114,10 +115,10 @@ public class PlotEulerAngles {
 					times.remove(i);
 				}
 			}
-			phi.add(phi_theta_psi_psim.get(0));
-			theta.add(phi_theta_psi_psim.get(1));
-			psi.add(phi_theta_psi_psim.get(2));
-			psim.add(phi_theta_psi_psim.get(3));
+			phi.add(phi_theta_psi_psim.get(0)*(180.0/Math.PI));
+			theta.add(phi_theta_psi_psim.get(1)*(180.0/Math.PI));
+			psi.add(phi_theta_psi_psim.get(2)*(180.0/Math.PI));
+			psim.add(phi_theta_psi_psim.get(3)*(180.0/Math.PI));
 
 			times.add(curr_date);
 
@@ -135,7 +136,7 @@ public class PlotEulerAngles {
 			System.out.println(phi.size() + " " + theta.size() + " " + psi.size() + " " + psim.size() + " " + times.size());
 			int numCharts = 3;
 			String[] titles = {"Euler Angles - x axis","Euler Angles - y axis", "Euler Angles - z axis"};
-			String y_axes = "rad";
+			String y_axes = "degrees";
 			String[] legend = {"phi","theta","psi","psi_magn"};
 
 			Vector<Vector<Double>> total = new Vector<Vector<Double>>();
@@ -146,7 +147,7 @@ public class PlotEulerAngles {
 			
 			List<Chart> charts = new ArrayList<Chart>();
 			for (int i = 0; i < numCharts; i++) {
-				XYChart chart = new XYChartBuilder().title(titles[i]+" "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
+				XYChart chart = new XYChartBuilder().title(titles[i]+" - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle(y_axes).width(800).height(800).build();
 				chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
 				chart.getStyler().setChartTitleVisible(true);
 				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);

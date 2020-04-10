@@ -47,7 +47,7 @@ public class PlotSoundSpeed {
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
+	static Integer max_size_1000 = 1000;
 	static Vector<Double> sspeed = new Vector<Double>(); 
 	static Vector<Date> times = new Vector<Date>();
 	static Date prev_date_plot = null;
@@ -75,9 +75,9 @@ public class PlotSoundSpeed {
 		String value;
 		Double value_d;
 
-		if(sspeed.size() == max_size_100)
+		if(sspeed.size() == max_size_1000)
 		{
-			for(int i=0;i<10;i++)
+			for(int i=0;i<max_size_1000/10;i++)
 			{
 				sspeed.remove(i);
 				times.remove(i);
@@ -103,7 +103,7 @@ public class PlotSoundSpeed {
 			System.out.println("Generating plot!");
 			System.out.println(sspeed.size() + " " + times.size());
 			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Sound Speed - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("V").build();
+			XYChart chart = new XYChartBuilder().width(600).height(500).title("Sound Speed - "+date_title+ " (last update "+date_x_axis+")").xAxisTitle("Time").yAxisTitle("m/s").build();
 
 			// Customize Chart
 			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);

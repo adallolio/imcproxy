@@ -55,7 +55,7 @@ public class PlotRelativeWind {
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
+	static Integer max_size_1000 = 1000;
 	static Vector<Double> angle = new Vector<Double>(); 
 	static Vector<Double> speed = new Vector<Double>();
 	static Vector<Date> times = new Vector<Date>();
@@ -100,9 +100,9 @@ public class PlotRelativeWind {
 				value_d = Double.valueOf(value);
 				ang_speed.add(value_d);
 			}
-			if(angle.size() == max_size_100)
+			if(angle.size() == max_size_1000)
 			{
-				for(int i=0;i<10;i++)
+				for(int i=0;i<max_size_1000/10;i++)
 				{
 					angle.remove(i);
 					speed.remove(i);
@@ -147,7 +147,7 @@ public class PlotRelativeWind {
 				chart.getStyler().setPlotMargin(0);
 				chart.getStyler().setPlotContentSize(.95);
 				XYSeries series = chart.addSeries(legend[i], times, total.get(i));
-				series.setMarker(SeriesMarkers.NONE);
+				//series.setMarker(SeriesMarkers.NONE);
 				charts.add(chart);
 			}
 
