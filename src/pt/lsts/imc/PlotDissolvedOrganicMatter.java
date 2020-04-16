@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -47,16 +49,18 @@ import java.awt.Color;
 public class PlotDissolvedOrganicMatter {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> dom = new Vector<Double>(); 
-	static Vector<Date> times = new Vector<Date>();
+	static Vector<String> dom = new Vector<String>(); 
+	static Vector<String> times = new Vector<String>();
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
-    static Integer frequency = 1;
+	static Integer frequency = 1;
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/dom.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname dom --fieldcolumns value";
     
     static void plot(IMCMessage message){
 
@@ -68,15 +72,16 @@ public class PlotDissolvedOrganicMatter {
 			prev_date_plot = curr_date;
 
 		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
 		System.out.println("DissolvedOrganicMatter record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
 		String key;
 		String value;
-		Double value_d;
-		ArrayList<Double> ddom = new ArrayList<Double>();
+		ArrayList<String> ddom = new ArrayList<String>();
 
 		if(dom.size() == max_size_1000)
 		{
@@ -91,20 +96,56 @@ public class PlotDissolvedOrganicMatter {
 			//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 			key = entry.getKey();
 			value = entry.getValue().toString();
-			value_d = Double.valueOf(value);
-			ddom.add(value_d);
+			ddom.add(value);
 		}
 
 		dom.add(ddom.get(0));
 
-		times.add(curr_date);
+		times.add(date_csv);
 
-		System.out.println(ddom.get(0) + " " + date_x_axis);
+		System.out.println(ddom.get(0) + " " + date_csv);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
+			System.out.println("Generating CSV!");
+			System.out.println(dom.size() + " " + times.size());
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/dom.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("value");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				for(int i=0; i<dom.size(); i++)
+				{
+					sb.append(times.get(i));
+					sb.append(',');
+					sb.append(dom.get(i));
+					sb.append('\n');
+				}
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+			} catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			}
+			prev_date_plot = curr_date;
+
+			/*
 			System.out.println("Generating plot!");
 			System.out.println(dom.size() + " " + times.size());
 			// Create Chart
@@ -126,7 +167,7 @@ public class PlotDissolvedOrganicMatter {
 				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/dissolvedorganicmatter-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
-			prev_date_plot = curr_date;
+			prev_date_plot = curr_date;*/
 		}
     }
     

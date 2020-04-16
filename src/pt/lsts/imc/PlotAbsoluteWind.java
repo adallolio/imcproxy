@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -47,18 +49,20 @@ import java.awt.Color;
 public class PlotAbsoluteWind {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> dir = new Vector<Double>(); 
-	static Vector<Double> speed = new Vector<Double>();
-	static Vector<Date> times = new Vector<Date>();
+	static Vector<String> dir = new Vector<String>(); 
+	static Vector<String> speed = new Vector<String>();
+	static Vector<String> times = new Vector<String>();
 	static Date prev_date = null;
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
-    static Integer[] frequency = {10,1};
+	static Integer[] frequency = {10,1};
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/absolutewind.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname absolutewind --fieldcolumns direction,speed";
     
     static void plot(IMCMessage message){
 
@@ -74,7 +78,8 @@ public class PlotAbsoluteWind {
 		get_record = checkDates(curr_date, prev_date, time_unit[0], frequency[0]);
 
 		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
 		if(get_record)
 		{
@@ -84,15 +89,14 @@ public class PlotAbsoluteWind {
 			values = message.getValues();
 			String key;
 			String value;
-			Double value_d;
-			ArrayList<Double> ang_speed = new ArrayList<Double>();
+			ArrayList<String> ang_speed = new ArrayList<String>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
 				System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 				key = entry.getKey();
 				value = entry.getValue().toString();
-				value_d = Double.valueOf(value);
-				ang_speed.add(value_d);
+				//value_d = Double.valueOf(value);
+				ang_speed.add(value);
 			}
 			if(dir.size() == max_size_1000)
 			{
@@ -106,7 +110,7 @@ public class PlotAbsoluteWind {
 			dir.add(ang_speed.get(0));
 			speed.add(ang_speed.get(1));
 
-			times.add(curr_date);
+			times.add(date_csv);
 
 			System.out.println(dir.size() + " " + curr_date);
 			//System.out.println(date);
@@ -118,7 +122,48 @@ public class PlotAbsoluteWind {
 
 		if(plot)
 		{
-			System.out.println("Generating plot!");
+			System.out.println("Generating CSV!");
+			System.out.println(dir.size() + " " + speed.size() + times.size());
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/absolutewind.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("direction");
+				sb.append(',');
+				sb.append("speed");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				for(int i=0; i<dir.size(); i++)
+				{
+					sb.append(times.get(i));
+					sb.append(',');
+					sb.append(dir.get(i));
+					sb.append(',');
+					sb.append(speed.get(i));
+					sb.append('\n');
+				}
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+
+			} catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			}
+			prev_date_plot = curr_date;
+
+			/*System.out.println("Generating plot!");
 			System.out.println(dir.size() + " " + speed.size() + " " + times.size());
 
 			int numCharts = 2;
@@ -149,7 +194,7 @@ public class PlotAbsoluteWind {
 			} catch (IOException e) {
 			e.printStackTrace();
 			}			
-			prev_date_plot = curr_date;
+			prev_date_plot = curr_date;*/
 		}
     }
     

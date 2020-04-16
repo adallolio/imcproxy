@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -45,12 +47,12 @@ import java.awt.Color;
 public class PlotStorageUsage {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
     // Storage Usage.
-	static Double available;
-	static Double used; 
+	static String available;
+	static String used; 
 	static Date prev_date_plot_l2 = null;
 	static Date prev_date_plot_l3 = null;
 	static int AutoNautL2 = 34819;
@@ -58,7 +60,9 @@ public class PlotStorageUsage {
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
-    static Integer[] frequency = {10,1};
+	static Integer[] frequency = {10,1};
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/storageusage.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname storageusage --fieldcolumns unit,available,used";
     
     static void plot(IMCMessage message){
 
@@ -75,7 +79,9 @@ public class PlotStorageUsage {
 			if(plot)
 			{
 				String date_title = format_title.format(message.getDate());
-				String date_x_axis = format_x_axis.format(message.getDate());
+				// Get date from server.
+				String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
 				System.out.println("StorageUsage from L2 saved!");
 				Map<String, Object> values = new LinkedHashMap<String, Object>();
 				
@@ -83,20 +89,60 @@ public class PlotStorageUsage {
 				//boolean first_it = true;
 				String key;
 				String value;
-				Double value_d;
-				ArrayList<Double> storage = new ArrayList<Double>();
+				ArrayList<String> storage = new ArrayList<String>();
 
 				for (Map.Entry<String, Object> entry : values.entrySet()) {
 					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 					key = entry.getKey();
 					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					storage.add(value_d);
+					storage.add(value);
 				}
 
-				available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
+				Double av_dbl = Double.valueOf(storage.get(0));
+				Double av_dbl_GB = Math.round(av_dbl/1000 * 100.0) / 100.0;
+				available = Double.toString(av_dbl_GB);
 				used = storage.get(1);
 
+				System.out.println("Generating CSV!");
+
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/storageusage.csv"))) {
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("timestamp");
+					sb.append(',');
+					sb.append("unit");
+					sb.append(',');
+					sb.append("available");
+					sb.append(',');
+					sb.append("used");
+					sb.append('\n');
+
+					sb.append(date_csv);
+					sb.append(',');
+					sb.append("l2");
+					sb.append(',');
+					sb.append(available);
+					sb.append(',');
+					sb.append(used);
+					sb.append('\n');
+
+					writer.write(sb.toString());
+
+					System.out.println("done!");
+
+					try {
+						Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+						System.out.println("Writing to AutoNaut InfluxDB!");
+					} catch(IOException f) {
+					}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println(e.getMessage());
+				}
+				prev_date_plot_l2 = curr_date;
+
+				/*
 				System.out.println("Generating plot!");
 				// Create Chart
 				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 2 Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -113,7 +159,7 @@ public class PlotStorageUsage {
 					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l2storageusage-rt", BitmapFormat.PNG);
 				} catch(IOException e) {
 				}
-				prev_date_plot_l2 = curr_date;
+				prev_date_plot_l2 = curr_date;*/
 			}
 		} else if(message.getSrc() == AutoNautL3)
 		{
@@ -125,7 +171,9 @@ public class PlotStorageUsage {
 			if(plot)
 			{
 				String date_title = format_title.format(message.getDate());
-				String date_x_axis = format_x_axis.format(message.getDate());
+				// Get date from server.
+				String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
 				System.out.println("StorageUsage from L3 saved!");
 				Map<String, Object> values = new LinkedHashMap<String, Object>();
 				
@@ -133,20 +181,60 @@ public class PlotStorageUsage {
 				//boolean first_it = true;
 				String key;
 				String value;
-				Double value_d;
-				ArrayList<Double> storage = new ArrayList<Double>();
+				ArrayList<String> storage = new ArrayList<String>();
 
 				for (Map.Entry<String, Object> entry : values.entrySet()) {
 					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 					key = entry.getKey();
 					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					storage.add(value_d);
+					storage.add(value);
 				}
 
-				available = Math.round(storage.get(0)/1000 * 100.0) / 100.0;
+				Double av_dbl = Double.valueOf(storage.get(0));
+				Double av_dbl_GB = Math.round(av_dbl/1000 * 100.0) / 100.0;
+				available = Double.toString(av_dbl_GB);
 				used = storage.get(1);
 
+				System.out.println("Generating CSV!");
+
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/storageusage.csv"))) {
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("timestamp");
+					sb.append(',');
+					sb.append("unit");
+					sb.append(',');
+					sb.append("available");
+					sb.append(',');
+					sb.append("used");
+					sb.append('\n');
+
+					sb.append(date_csv);
+					sb.append(',');
+					sb.append("l3");
+					sb.append(',');
+					sb.append(available);
+					sb.append(',');
+					sb.append(used);
+					sb.append('\n');
+
+					writer.write(sb.toString());
+
+					System.out.println("done!");
+
+					try {
+						Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+						System.out.println("Writing to AutoNaut InfluxDB!");
+					} catch(IOException f) {
+					}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println(e.getMessage());
+				}
+				prev_date_plot_l3 = curr_date;
+
+				/*
 				System.out.println("Generating plot!");
 				// Create Chart
 				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 3 Disc Storage - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -165,7 +253,7 @@ public class PlotStorageUsage {
 					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l3storageusage-rt", BitmapFormat.PNG);
 				} catch(IOException e) {
 				}
-				prev_date_plot_l3 = curr_date;
+				prev_date_plot_l3 = curr_date;*/
 			}
 		}
     }

@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -45,16 +47,18 @@ import java.awt.Color;
 public class PlotAirSaturation {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_100 = 100;
-	static Double air; 
+	static String air;
 	static Date prev_date = null;
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
-    static Integer frequency = 1;
+	static Integer frequency = 1;
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/airsaturation.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname airsaturation --fieldcolumns air";
 
     static void plot(IMCMessage message){
 
@@ -66,27 +70,61 @@ public class PlotAirSaturation {
 			prev_date_plot = curr_date;
 
 		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
 		System.out.println("AirSaturation record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
 		String key;
 		String value;
-		Double value_d;
+		//Double value_d;
 
 		for (Map.Entry<String, Object> entry : values.entrySet()) {
 			System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 			key = entry.getKey();
 			value = entry.getValue().toString();
-			value_d = Double.valueOf(value);
-			air = value_d;
+			//value_d = Double.valueOf(value);
+			air = value;
 		}
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
+			System.out.println("Generating CSV!");
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/airsaturation.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("air");
+				sb.append('\n');
+
+				sb.append(date_csv);
+				sb.append(',');
+				sb.append(air);
+				sb.append('\n');
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+
+			} catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			}
+			prev_date_plot = curr_date;
+
+			/*
 			System.out.println("Generating plot!");
 			// Create Chart
 			PieChart chart = new PieChartBuilder().width(800).height(600).title("Air Saturation - "+date_title+ " (last update "+date_x_axis+")").build();
@@ -105,7 +143,7 @@ public class PlotAirSaturation {
 				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/airsaturation-rt", BitmapFormat.PNG);
 			} catch(IOException e) {
 			}
-			prev_date_plot = curr_date;
+			prev_date_plot = curr_date;*/
 		}
     }
     

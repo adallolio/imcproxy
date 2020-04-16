@@ -75,18 +75,7 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			//console("The message is from AutoNaut!");
 			saveMessage(message);
-		} else
-		{
-			console("MESSAGE from Neptus!");
-			console(message.getSourceName());
-			/*String url_string = Tiles.getTileURL(63.407048d, 10.377523d, 15);
-			try {
-				URL url = new URL(url_string);
-				Tiles.downloadTile(url, "/home/autonaut/tile");
-			} catch(IOException e) {
-				System.out.println(e.getMessage());
-			}*/
-		}	
+		}
 	}
 
 	public void saveMessage(IMCMessage message) {
@@ -108,20 +97,20 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotAngularVelocity.plot(message); // 2 entities from L2 - do not try.
 		} else if(temp.equals("EulerAngles"))
 		{
-			//console("EulerAngles received");
-			//PlotEulerAngles.plot(message);
+			console("EulerAngles received");
+			PlotEulerAngles.plot(message);
 		} else if(temp.equals("Voltage"))
 		{
-			//console("Voltage received");
-			//PlotVoltage.plot(message);
+			console("Voltage received");
+			PlotVoltage.plot(message);
 		} else if(temp.equals("StorageUsage"))
 		{
-			//console("StorageUsage received");
-			//PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
+			console("StorageUsage received");
+			PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
 		} else if(temp.equals("RelativeWind"))
 		{
-			//console("RelativeWind received");
-			//PlotRelativeWind.plot(message);
+			console("RelativeWind received");
+			PlotRelativeWind.plot(message);
 		} else if(temp.equals("AirSaturation"))
 		{
 			//console("AirSaturation received");
@@ -140,8 +129,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotConductivity.plot(message);
 		} else if(temp.equals("CpuUsage"))
 		{
-			//console("CpuUsage received");
-			//PlotCpuUsage.plot(message);
+			console("CpuUsage received");
+			PlotCpuUsage.plot(message);
 		} else if(temp.equals("Current"))
 		{
 			//console("Current received");
@@ -156,12 +145,12 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotDissolvedOrganicMatter.plot(message);
 		} else if(temp.equals("EstimatedFreq"))
 		{
-			//console("EstimatedFreq received");
-			//PlotEstimatedFreq.plot(message);
+			console("EstimatedFreq received");
+			PlotEstimatedFreq.plot(message);
 		} else if(temp.equals("Heave"))
 		{
-			//console("Heave received");
-			//PlotHeave.plot(message); // 2 entities from L2 - do not try.
+			console("Heave received");
+			PlotHeave.plot(message); // 2 entities from L2 - do not try.
 		} else if(temp.equals("OpticalBackscatter"))
 		{
 			//console("OpticalBackscatter received");
@@ -180,8 +169,8 @@ public class ImcProxyPlot extends ImcClientSocket {
 			//PlotPressure.plot(message);
 		} else if(temp.equals("AbsoluteWind"))
 		{
-			//console("AbsoluteWind received");
-			//PlotAbsoluteWind.plot(message);
+			console("AbsoluteWind received");
+			PlotAbsoluteWind.plot(message);
 		} else if(temp.equals("Salinity"))
 		{
 			//console("Salinity received");

@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -46,20 +48,22 @@ import java.awt.Color;
 public class PlotAcceleration {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> x = new Vector<Double>(); 
-	static Vector<Double> y = new Vector<Double>();
-	static Vector<Double> z = new Vector<Double>();
-	static Vector<Date> times = new Vector<Date>();
+	static Vector<String> x = new Vector<String>(); 
+	static Vector<String> y = new Vector<String>();
+	static Vector<String> z = new Vector<String>();
+	static Vector<String> times = new Vector<String>();
 	static Date prev_date = null;
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
-    static Integer[] frequency = {10,1};
-    
+	static Integer[] frequency = {10,1};
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/acceleration.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname acceleration --fieldcolumns x,y,z";
+
     static void plot(IMCMessage message){
 
 		boolean get_record = false;
@@ -74,7 +78,8 @@ public class PlotAcceleration {
 		get_record = checkDates(curr_date, prev_date, time_unit[0], frequency[0]);
 
 		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
 		if(get_record)
 		{
@@ -86,7 +91,7 @@ public class PlotAcceleration {
 			String key;
 			String value;
 			Double value_d;
-			ArrayList<Double> xyz = new ArrayList<Double>();
+			ArrayList<String> xyz = new ArrayList<String>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
 				if(!first_it)
@@ -94,8 +99,9 @@ public class PlotAcceleration {
 					//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 					key = entry.getKey();
 					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					xyz.add(value_d);
+					//value_d = Double.valueOf(value);
+					//xyz.add(value_d);
+					xyz.add(value);
 				}
 				first_it = false;
 			}
@@ -109,11 +115,22 @@ public class PlotAcceleration {
 					times.remove(i);
 				}
 			}
+			/*
+			String x_split[] = xyz.get(0).split(".");
+			String x_add = x_split[0]+x_split[0].substring(0,3);
+			x.add(x_add);
+			String y_split[] = xyz.get(1).split(".");
+			String y_add = y_split[0]+y_split[0].substring(0,3);
+			y.add(y_add);
+			String z_split[] = xyz.get(2).split(".");
+			String z_add = z_split[0]+z_split[0].substring(0,3);
+			z.add(z_add);*/
 			x.add(xyz.get(0));
 			y.add(xyz.get(1));
 			z.add(xyz.get(2));
 
-			times.add(curr_date);
+			//times.add(curr_date);
+			times.add(date_csv);
 
 			System.out.println(x.size() + " " + curr_date);
 			//System.out.println(date);
@@ -125,6 +142,52 @@ public class PlotAcceleration {
 
 		if(plot)
 		{
+			System.out.println("Generating CSV!");
+			System.out.println(x.size() + " " + y.size() + " " + z.size() + " " + times.size());
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/acceleration.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("x");
+				sb.append(',');
+				sb.append("y");
+				sb.append(',');
+				sb.append("z");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				for(int i=0; i<x.size(); i++)
+				{
+					sb.append(times.get(i));
+					sb.append(',');
+					sb.append(x.get(i));
+					sb.append(',');
+					sb.append(y.get(i));
+					sb.append(',');
+					sb.append(z.get(i));
+					sb.append('\n');
+				}
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+
+			  } catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			  }
+			  prev_date_plot = curr_date;
+
+			/*
 			System.out.println("Generating plot!");
 			System.out.println(x.size() + " " + y.size() + " " + z.size() + " " + times.size());
 
@@ -158,10 +221,10 @@ public class PlotAcceleration {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			prev_date_plot = curr_date;
+			prev_date_plot = curr_date;*/
 		}
     }
-    
+
     static boolean checkDates(Date current, Date previous, String unit, Integer frequency) {
 		long diff = current.getTime() - previous.getTime();
 		if(diff >= 0)

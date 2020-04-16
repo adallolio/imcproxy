@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -47,20 +49,22 @@ import java.awt.Color;
 public class PlotEulerAngles {
     	static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> phi = new Vector<Double>(); 
-	static Vector<Double> theta = new Vector<Double>();
-	static Vector<Double> psi = new Vector<Double>();
-	static Vector<Double> psim = new Vector<Double>();
-	static Vector<Date> times = new Vector<Date>();
+	static Vector<String> phi = new Vector<String>(); 
+	static Vector<String> theta = new Vector<String>();
+	static Vector<String> psi = new Vector<String>();
+	static Vector<String> psim = new Vector<String>();
+	static Vector<String> times = new Vector<String>();
 	static Date prev_date = null;
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
-    static Integer[] frequency = {10,1};
+	static Integer[] frequency = {10,1};
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/eulerangles.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname eulerangles --fieldcolumns phi,theta,psi,psim";
     
     static void plot(IMCMessage message){
 
@@ -79,7 +83,8 @@ public class PlotEulerAngles {
 		get_record = checkDates(curr_date, prev_date, time_unit[0], frequency[0]);
 
 		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
 		if(get_record)
 		{
@@ -90,8 +95,7 @@ public class PlotEulerAngles {
 			boolean first_it = true;
 			String key;
 			String value;
-			Double value_d;
-			ArrayList<Double> phi_theta_psi_psim = new ArrayList<Double>();
+			ArrayList<String> phi_theta_psi_psim = new ArrayList<String>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
 				if(!first_it)
@@ -99,8 +103,7 @@ public class PlotEulerAngles {
 					//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
 					key = entry.getKey();
 					value = entry.getValue().toString();
-					value_d = Double.valueOf(value);
-					phi_theta_psi_psim.add(value_d);
+					phi_theta_psi_psim.add(value);
 				}
 				first_it = false;
 			}
@@ -115,14 +118,26 @@ public class PlotEulerAngles {
 					times.remove(i);
 				}
 			}
-			phi.add(phi_theta_psi_psim.get(0)*(180.0/Math.PI));
-			theta.add(phi_theta_psi_psim.get(1)*(180.0/Math.PI));
-			psi.add(phi_theta_psi_psim.get(2)*(180.0/Math.PI));
-			psim.add(phi_theta_psi_psim.get(3)*(180.0/Math.PI));
+			Double phi_dbl = Double.valueOf(phi_theta_psi_psim.get(0));
+			Double phi_dbl_deg = phi_dbl*(180.0/Math.PI);
+			String phi_s = Double.toString(phi_dbl_deg);
+			phi.add(phi_s);
+			Double theta_dbl = Double.valueOf(phi_theta_psi_psim.get(1));
+			Double theta_dbl_deg = theta_dbl*(180.0/Math.PI);
+			String theta_s = Double.toString(theta_dbl_deg);
+			theta.add(theta_s);
+			Double psi_dbl = Double.valueOf(phi_theta_psi_psim.get(2));
+			Double psi_dbl_deg = psi_dbl*(180.0/Math.PI);
+			String psi_s = Double.toString(psi_dbl_deg);
+			psi.add(psi_s);
+			Double psim_dbl = Double.valueOf(phi_theta_psi_psim.get(3));
+			Double psim_dbl_deg = psim_dbl*(180.0/Math.PI);
+			String psim_s = Double.toString(psim_dbl_deg);
+			psim.add(psim_s);
 
-			times.add(curr_date);
+			times.add(date_csv);
 
-			System.out.println(phi.size() + " " + curr_date);
+			System.out.println(phi.size() + " " + date_csv);
 			//System.out.println(date);
 			prev_date = curr_date;
 		} else
@@ -132,6 +147,56 @@ public class PlotEulerAngles {
 
 		if(plot)
 		{
+			System.out.println("Generating CSV!");
+			System.out.println(phi.size() + " " + theta.size() + " " + psi.size() + " " + psim.size() + " " + times.size());
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/eulerangles.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("phi");
+				sb.append(',');
+				sb.append("theta");
+				sb.append(',');
+				sb.append("psi");
+				sb.append(',');
+				sb.append("psim");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				for(int i=0; i<phi.size(); i++)
+				{
+					sb.append(times.get(i));
+					sb.append(',');
+					sb.append(phi.get(i));
+					sb.append(',');
+					sb.append(theta.get(i));
+					sb.append(',');
+					sb.append(psi.get(i));
+					sb.append(',');
+					sb.append(psim.get(i));
+					sb.append('\n');
+				}
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+
+			  } catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			  }
+			  prev_date_plot = curr_date;
+
+			/*
 			System.out.println("Generating plot!");
 			System.out.println(phi.size() + " " + theta.size() + " " + psi.size() + " " + psim.size() + " " + times.size());
 			int numCharts = 3;
@@ -167,7 +232,7 @@ public class PlotEulerAngles {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			prev_date_plot = curr_date;
+			prev_date_plot = curr_date;*/
 		}
     }
 
