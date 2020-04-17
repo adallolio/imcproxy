@@ -48,8 +48,6 @@ public class PlotStorageUsage {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
-	// Maximum record vector size - moving window.
-	static Integer max_size_100 = 100;
     // Storage Usage.
 	static String available;
 	static String used; 
