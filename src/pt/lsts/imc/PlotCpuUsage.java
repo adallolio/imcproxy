@@ -33,13 +33,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import pt.lsts.imc.net.UDPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
-
-import org.knowm.xchart.*;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.XYSeries.*;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.style.Styler.LegendPosition;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
@@ -129,27 +122,6 @@ public class PlotCpuUsage {
 					System.out.println(e.getMessage());
 				}
 				prev_date_plot_l2 = curr_date;
-				
-				/*
-				System.out.println("Generating plot!");
-				// Create Chart
-				PieChart chart = new PieChartBuilder().width(800).height(600).title("Level 2 Cpu Usage - "+date_title+ " (last update "+date_x_axis+")").build();
-
-				// Customize Chart
-				Color[] sliceColors = new Color[] { new Color(224, 68, 14), new Color(246, 199, 182) };
-				chart.getStyler().setSeriesColors(sliceColors);
-				chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-
-				chart.addSeries("Used", cpu);
-				chart.addSeries("Available", 100.0-cpu);
-				
-				// Save it
-				try {
-					BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/l2cpuusage-rt", BitmapFormat.PNG);
-				} catch(IOException e) {
-				}
-				prev_date_plot_l2 = curr_date;
-				*/
 			}
 		} else if(message.getSrc() == AutoNautL3)
 		{
@@ -181,7 +153,7 @@ public class PlotCpuUsage {
 
 				System.out.println("Generating CSV!");
 
-				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/airsaturation.csv"))) {
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/cpuusage.csv"))) {
 
 					StringBuilder sb = new StringBuilder();
 					sb.append("timestamp");

@@ -69,7 +69,6 @@ public class PlotDissolvedOxygen {
 		if(prev_date_plot == null)
 			prev_date_plot = curr_date;
 
-		String date_title = format_title.format(message.getDate());
 		// Get date from server.
 		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
@@ -139,29 +138,6 @@ public class PlotDissolvedOxygen {
 				System.out.println(e.getMessage());
 			}
 			prev_date_plot = curr_date;
-			/*
-			System.out.println("Generating plot!");
-			System.out.println(oxygen.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Dissolved Oxygen - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("µM").build();
-
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
-
-			chart.addSeries("oxygen", times, oxygen);
-			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/dissolvedoxygen-rt", BitmapFormat.PNG);
-			} catch(IOException e) {
-			}
-			prev_date_plot = curr_date;*/
 		}
     }
     

@@ -32,17 +32,15 @@ import pt.lsts.imc.net.UDPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
 
-import org.knowm.xchart.*;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.XYSeries.*;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.PdfboxGraphicsEncoder;
-import org.knowm.xchart.internal.chartpart.Chart;
-import org.knowm.xchart.style.Styler.LegendPosition;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
+
+import pt.lsts.imc.EntityList;
+import pt.lsts.imc.EntityList.OP;
+import pt.lsts.imc.IMCAddressResolver;
+import pt.lsts.imc.IMCDefinition;
+import pt.lsts.imc.IMCMessage;
 
 import java.net.URL;
 
@@ -55,6 +53,11 @@ public class ImcProxyPlot extends ImcClientSocket {
 												"StorageUsage", "Temperature", "Voltage");
 	public int AutoNautL2 = 34819;
 	public int AutoNautL3 = 34820;
+	public LinkedHashMap<String, String> AutoNautL2_entities = new LinkedHashMap<String, String>();
+	public LinkedHashMap<String, String> AutoNautL3_entities = new LinkedHashMap<String, String>();
+	public boolean L2entities_arrived = false;
+	public boolean L3entities_arrived = false;
+
 	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
 
 	public ImcProxyPlot(String serverHost, int serverPort) throws Exception {
@@ -69,6 +72,25 @@ public class ImcProxyPlot extends ImcClientSocket {
 	public void onMessage(IMCMessage message) {
 		//System.out.println("got "+message.getAbbrev()+","+message.getClass().getSimpleName()+" from web"); //Leave this here to test if this works
 
+		if(message.getAbbrev().equals("EntityList") && message.getSrc() == AutoNautL2 && !L2entities_arrived)
+		{
+			console("L2 ENTITY LIST RECEIVED");
+			if(message.getInteger("op") == 0) // OP.REPORT
+			{
+				AutoNautL2_entities = message.getTupleList("list");
+				L2entities_arrived = true;
+			}
+		}
+		if(message.getAbbrev().equals("EntityList") && message.getSrc() == AutoNautL3 && !L3entities_arrived)
+		{
+			console("L3 ENTITY LIST RECEIVED!");
+			if(message.getInteger("op") == 0) // OP.REPORT
+			{
+				AutoNautL3_entities = message.getTupleList("list");
+				L3entities_arrived = true;
+			}
+		}
+
 		// Check if message is coming from AutoNaut L2(0x8803 = 34819) or L3(0x8804 = 34820).
 		//console("The message is from " + message.getSrc());
 		if(message.getSrc() == AutoNautL2 || message.getSrc() == AutoNautL3)
@@ -79,22 +101,16 @@ public class ImcProxyPlot extends ImcClientSocket {
 	}
 
 	public void saveMessage(IMCMessage message) {
-		// dump(OutputStream err)
-		// Map<String, Object> getValues()
-		// Check what message is arrived.
-
 		String temp = message.getAbbrev();
-		
-		String entity = message.getEntityName();
 
 		if(temp.equals("Acceleration"))
 		{
 			console("Acceleration received");
 			PlotAcceleration.plot(message);
-		} else if(temp.equals("AngularVelocity"))
+		} else if(temp.equals("AngularVelocity") && L2entities_arrived)
 		{
-			//console("AngularVelocity received from " + entity);
-			//PlotAngularVelocity.plot(message); // 2 entities from L2 - do not try.
+			console("AngularVelocity received");
+			PlotAngularVelocity.plot(message,AutoNautL2_entities);
 		} else if(temp.equals("EulerAngles"))
 		{
 			console("EulerAngles received");
@@ -106,43 +122,43 @@ public class ImcProxyPlot extends ImcClientSocket {
 		} else if(temp.equals("StorageUsage"))
 		{
 			console("StorageUsage received");
-			PlotStorageUsage.plot(message); // 2 entities (L2-L3) - this I can solve.
+			PlotStorageUsage.plot(message);
 		} else if(temp.equals("RelativeWind"))
 		{
 			console("RelativeWind received");
 			PlotRelativeWind.plot(message);
 		} else if(temp.equals("AirSaturation"))
 		{
-			//console("AirSaturation received");
-			//PlotAirSaturation.plot(message);
+			console("AirSaturation received");
+			PlotAirSaturation.plot(message);
 		} else if(temp.equals("DissolvedOxygen"))
 		{
-			//console("DissolvedOxygen received");
-			//PlotDissolvedOxygen.plot(message);
+			console("DissolvedOxygen received");
+			PlotDissolvedOxygen.plot(message);
 		} else if(temp.equals("Chlorophyll"))
 		{
-			//console("Chlorophyll received");
-			//PlotChlorophyll.plot(message);
+			console("Chlorophyll received");
+			PlotChlorophyll.plot(message);
 		} else if(temp.equals("Conductivity"))
 		{
-			//console("Conductivity received");
-			//PlotConductivity.plot(message);
+			console("Conductivity received");
+			PlotConductivity.plot(message);
 		} else if(temp.equals("CpuUsage"))
 		{
 			console("CpuUsage received");
 			PlotCpuUsage.plot(message);
-		} else if(temp.equals("Current"))
+		} else if(temp.equals("Current") && L2entities_arrived)
 		{
-			//console("Current received");
-			//PlotCurrent.plot(message); // 2 entities from L2 - do not try.
+			console("Current received");
+			PlotCurrent.plot(message,AutoNautL2_entities);
 		} else if(temp.equals("Depth"))
 		{
-			//console("Depth received");
-			//PlotDepth.plot(message);
+			console("Depth received");
+			PlotDepth.plot(message);
 		} else if(temp.equals("DissolvedOrganicMatter"))
 		{
-			//console("DissolvedOrganicMatter received");
-			//PlotDissolvedOrganicMatter.plot(message);
+			console("DissolvedOrganicMatter received");
+			PlotDissolvedOrganicMatter.plot(message);
 		} else if(temp.equals("EstimatedFreq"))
 		{
 			console("EstimatedFreq received");
@@ -150,39 +166,43 @@ public class ImcProxyPlot extends ImcClientSocket {
 		} else if(temp.equals("Heave"))
 		{
 			console("Heave received");
-			PlotHeave.plot(message); // 2 entities from L2 - do not try.
+			PlotHeave.plot(message);
 		} else if(temp.equals("OpticalBackscatter"))
 		{
-			//console("OpticalBackscatter received");
-			//PlotOpticalBackscatter.plot(message);
-		} else if(temp.equals("Power"))
+			console("OpticalBackscatter received");
+			PlotOpticalBackscatter.plot(message);
+		} else if(temp.equals("Power") && L2entities_arrived)
 		{
-			//console("Power received");
-			//PlotPower.plot(message); // 3 entities from L2 - do not try.
+			console("Power received");
+			PlotPower.plot(message,AutoNautL2_entities);
 		} else if(temp.equals("PowerSettings"))
 		{
-			//console("PowerSettings received");
-			//PlotPowerSettings.plot(message); // Decide how to plot.
+			console("PowerSettings received");
+			PlotPowerSettings.plot(message);
 		} else if(temp.equals("Pressure"))
 		{
-			//console("Pressure received");
-			//PlotPressure.plot(message);
+			console("Pressure received");
+			PlotPressure.plot(message);
 		} else if(temp.equals("AbsoluteWind"))
 		{
 			console("AbsoluteWind received");
 			PlotAbsoluteWind.plot(message);
 		} else if(temp.equals("Salinity"))
 		{
-			//console("Salinity received");
-			//PlotSalinity.plot(message);
+			console("Salinity received");
+			PlotSalinity.plot(message);
 		} else if(temp.equals("SoundSpeed"))
 		{
-			//console("SoundSpeed received");
-			//PlotSoundSpeed.plot(message);
-		} else if(temp.equals("Temperature"))
+			console("SoundSpeed received");
+			PlotSoundSpeed.plot(message);
+		} else if(temp.equals("Temperature") && message.getSrc() == AutoNautL2 && L2entities_arrived)
 		{
-			//console("Temperature received");
-			//PlotTemperature.plot(message); // 4 entities: 2 from L2 and 2 from L3.
+			console("Temperature L2 received");
+			PlotTemperature.plot(message,AutoNautL2_entities);
+		} else if(temp.equals("Temperature") && message.getSrc() == AutoNautL3 && L3entities_arrived)
+		{
+			console("Temperature L3 received");
+			PlotTemperature.plot(message,AutoNautL3_entities);
 		} else if(temp.equals("GpsFix") && message.getSrc() == AutoNautL2)
 		{
 			console("GpsFix received");

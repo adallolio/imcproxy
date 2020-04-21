@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -31,13 +33,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import pt.lsts.imc.net.UDPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
-
-import org.knowm.xchart.*;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.XYSeries.*;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.style.Styler.LegendPosition;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
@@ -45,83 +40,215 @@ import java.awt.Color;
 public class PlotTemperature {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> temperature = new Vector<Double>(); 
-	static Vector<Date> times = new Vector<Date>();
-	static Date prev_date_plot = null;
+	static Vector<String> temperaturel2 = new Vector<String>(); 
+	static Vector<String> temperaturel3 = new Vector<String>(); 
+	static Vector<String> times = new Vector<String>();
+	static Vector<String> entities_vec = new Vector<String>();
+	static Date prev_date_plot_l2 = null;
+	static Date prev_date_plot_l3 = null;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
-    static Integer frequency = 1;
+	static Integer frequency = 1;
+	// String for influxdb.
+	
+	static int AutoNautL2 = 34819;
+	static int AutoNautL3 = 34820;
     
-    static void plot(IMCMessage message){
-
-		boolean plot = false;
-
-		Date curr_date = message.getDate();
-
-		if(prev_date_plot == null)
-			prev_date_plot = curr_date;
-
-		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
-		System.out.println("Temperature record saved!");
-		Map<String, Object> values = new LinkedHashMap<String, Object>();
-		
-		values = message.getValues();
-		String key;
-		String value;
-		Double value_d;
-
-		if(temperature.size() == max_size_1000)
+    static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
+		if(message.getSrc() == AutoNautL2)
 		{
-			for(int i=0;i<max_size_1000/10;i++)
+			String influxdbl2 = "";
+			influxdbl2 = influxdbl2+"--input /home/autonaut/java_to_influx/temperaturel2.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname temperaturel2 --fieldcolumns value,entity";
+			String int_ent = entities.get("STB - ADIS");
+			Integer int_ent_int = Integer.parseInt(int_ent);
+			String ext_ent = entities.get("Weather Station Temperature");
+			Integer ext_ent_int = Integer.parseInt(ext_ent);
+
+			short entity = message.getSrcEnt();
+			String entity_to_csv = "";
+			if(entity == int_ent_int)
 			{
-				temperature.remove(i);
-				times.remove(i);
+				System.out.println("Internal emperature!");
+				entity_to_csv = entity_to_csv+"int";
+			} else if(entity == ext_ent_int)
+			{
+				System.out.println("Weather Station Temperature!");
+				entity_to_csv = entity_to_csv+"ext";
 			}
-		}
 
-		for (Map.Entry<String, Object> entry : values.entrySet()) {
-			//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-			key = entry.getKey();
-			value = entry.getValue().toString();
-			value_d = Double.valueOf(value);
-			temperature.add(value_d);
-		}
+			boolean plot = false;
 
-		times.add(curr_date);
+			Date curr_date = message.getDate();
 
-		System.out.println(temperature.size() + " " + date_x_axis);
+			if(prev_date_plot_l2 == null)
+				prev_date_plot_l2 = curr_date;
 
-		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
+			// Get date from server.
+			String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
-		if(plot)
-		{
-			System.out.println("Generating plot!");
-			System.out.println(temperature.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("What Temperature? - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("V").build();
-
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
-
-			chart.addSeries("temperature", times, temperature);
+			//System.out.println("Temperature record saved!");
 			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/temperature-rt", BitmapFormat.PNG);
-			} catch(IOException e) {
+			if(temperaturel2.size() == max_size_1000)
+			{
+				for(int i=0;i<max_size_1000/10;i++)
+				{
+					temperaturel2.remove(i);
+					times.remove(i);
+					entities_vec.remove(i);
+				}
 			}
-			prev_date_plot = curr_date;
+
+			String temp_string = message.getString("value");
+			temperaturel2.add(temp_string.substring(0, temp_string.length() - 4));
+			times.add(date_csv);
+			entities_vec.add(entity_to_csv);
+
+			System.out.println(temperaturel2.size() + " " + date_csv);
+
+			plot = checkDates(curr_date, prev_date_plot_l2, time_unit, frequency);
+
+			if(plot)
+			{
+				System.out.println("L2 Temperature CSV!");
+				System.out.println(temperaturel2.size() + " " + times.size());
+
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/temperaturel2.csv"))) {
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("timestamp");
+					sb.append(',');
+					sb.append("value");
+					sb.append(',');
+					sb.append("entity");
+					sb.append('\n');
+
+					//writer.write(sb.toString());
+
+					for(int i=0; i<temperaturel2.size(); i++)
+					{
+						sb.append(times.get(i));
+						sb.append(',');
+						sb.append(temperaturel2.get(i));
+						sb.append(',');
+						sb.append(entities_vec.get(i));
+						sb.append('\n');
+					}
+
+					writer.write(sb.toString());
+
+					System.out.println("done!");
+
+					try {
+						Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdbl2);
+						System.out.println("Writing to AutoNaut InfluxDB!");
+					} catch(IOException f) {
+					}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println(e.getMessage());
+				}
+				prev_date_plot_l2 = curr_date;
+			}
+		} else if(message.getSrc() == AutoNautL3)
+		{
+			String influxdbl3 = "";
+			influxdbl3 = influxdbl3+"--input /home/autonaut/java_to_influx/temperaturel3.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname temperaturel3 --fieldcolumns value,entity";
+			String ctd_ent = entities.get("SBE49FastCAT CTD Temperature");
+			Integer ctd_ent_int = Integer.parseInt(ctd_ent);
+			String opt_ent = entities.get("Optode4385 Temperature");
+			Integer opt_ent_int = Integer.parseInt(opt_ent);
+
+			short entity = message.getSrcEnt();
+			String entity_to_csv = "";
+			if(entity == ctd_ent_int)
+			{
+				System.out.println("CTD temperature!");
+				entity_to_csv = entity_to_csv+"ctd";
+			} else if(entity == opt_ent_int)
+			{
+				System.out.println("Optode Temperature!");
+				entity_to_csv = entity_to_csv+"optode";
+			}
+
+			boolean plot = false;
+
+			Date curr_date = message.getDate();
+
+			if(prev_date_plot_l3 == null)
+				prev_date_plot_l3 = curr_date;
+
+			// Get date from server.
+			String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
+			System.out.println("Temperature record saved!");
+			
+			if(temperaturel3.size() == max_size_1000)
+			{
+				for(int i=0;i<max_size_1000/10;i++)
+				{
+					temperaturel3.remove(i);
+					times.remove(i);
+					entities_vec.remove(i);
+				}
+			}
+
+			String temp_string = message.getString("value");
+			temperaturel3.add(temp_string.substring(0, temp_string.length() - 4));
+			times.add(date_csv);
+			entities_vec.add(entity_to_csv);
+
+			System.out.println(temperaturel3.size() + " " + date_csv);
+
+			plot = checkDates(curr_date, prev_date_plot_l3, time_unit, frequency);
+
+			if(plot)
+			{
+				System.out.println("L3 Temperature CSV!");
+				System.out.println(temperaturel3.size() + " " + times.size());
+
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/temperaturel3.csv"))) {
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("timestamp");
+					sb.append(',');
+					sb.append("value");
+					sb.append(',');
+					sb.append("entity");
+					sb.append('\n');
+
+					//writer.write(sb.toString());
+
+					for(int i=0; i<temperaturel3.size(); i++)
+					{
+						sb.append(times.get(i));
+						sb.append(',');
+						sb.append(temperaturel3.get(i));
+						sb.append(',');
+						sb.append(entities_vec.get(i));
+						sb.append('\n');
+					}
+
+					writer.write(sb.toString());
+
+					System.out.println("done!");
+
+					try {
+						Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdbl3);
+						System.out.println("Writing to AutoNaut InfluxDB!");
+					} catch(IOException f) {
+					}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println(e.getMessage());
+				}
+				prev_date_plot_l3 = curr_date;
+			}
 		}
     }
     

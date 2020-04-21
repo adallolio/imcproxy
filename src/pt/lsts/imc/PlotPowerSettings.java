@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -31,13 +33,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import pt.lsts.imc.net.UDPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
-
-import org.knowm.xchart.*;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.XYSeries.*;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.style.Styler.LegendPosition;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
@@ -45,105 +40,92 @@ import java.awt.Color;
 public class PlotPowerSettings {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
-	// Maximum record vector size - moving window.
-	static Integer max_size_1000 = 1000;
-	static Vector<Integer> l2 = new Vector<Integer>(); 
-	static Vector<Integer> l3 = new Vector<Integer>();
-    static Vector<Integer> iridium = new Vector<Integer>();
-    static Vector<Integer> modem = new Vector<Integer>();
-    static Vector<Integer> pumps = new Vector<Integer>();
-    static Vector<Integer> vhf = new Vector<Integer>();
-	static Vector<Date> times = new Vector<Date>();
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	static Date prev_date = null;
-	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String[] time_unit = {"seconds","minutes"};
 	// Frequency for saving a record and for generating a new plot.
-    static Integer[] frequency = {10,1};
+	static Integer[] frequency = {10,1};
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/powersettings.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname powersettings --fieldcolumns l2,l3,iridium,modem,pumps,vhf";
     
     static void plot(IMCMessage message){
 
-		boolean get_record = false;
 		boolean plot = false;
 
 		Date curr_date = message.getDate();
 		if(prev_date == null)
 			prev_date = curr_date;
-		if(prev_date_plot == null)
-			prev_date_plot = curr_date;
 		
-		get_record = checkDates(curr_date, prev_date, time_unit[0], frequency[0]);
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
-		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		System.out.println("PowerSettings record saved!");
+		
+		String l2 = message.getString("l2"); 
+		String l3 = message.getString("l3");
+		String iridium = message.getString("iridium");
+		String modem = message.getString("modem");
+		String pumps = message.getString("pumps");
+		String vhf = message.getString("vhf");
 
-		if(get_record)
-		{
-			System.out.println("PowerSettings record saved!");
-			Map<String, Object> values = new LinkedHashMap<String, Object>();
-			
-			values = message.getValues();
-			boolean first_it = true;
-			String key;
-			String value;
-            Integer value_i;
-			ArrayList<Integer> settings = new ArrayList<Integer>();
-
-			for (Map.Entry<String, Object> entry : values.entrySet()) {
-				if(!first_it)
-				{
-					System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-					key = entry.getKey();
-					value = entry.getValue().toString();
-                    value_i = Integer.parseInt(value);
-					settings.add(value_i);
-				}
-				first_it = false;
-			}
-			if(l2.size() == max_size_1000)
-			{
-				for(int i=0;i<max_size_1000/10;i++)
-				{
-					l2.remove(i);
-					l3.remove(i);
-                    iridium.remove(i);
-                    modem.remove(i);
-                    pumps.remove(i);
-                    vhf.remove(i);
-			times.remove(i);
-				}
-			}
-			l2.add(settings.get(0));
-			l3.add(settings.get(1));
-            iridium.add(settings.get(2));
-            modem.add(settings.get(3));
-			pumps.add(settings.get(4));
-			vhf.add(settings.get(5));
-
-			times.add(curr_date);
-
-			System.out.println(l2.size() + " " + curr_date);
-			//System.out.println(date);
-			prev_date = curr_date;
-		} else
-			System.out.println("PowerSettings discarded!");
-
-		plot = checkDates(curr_date, prev_date_plot, time_unit[1], frequency[1]);
+		plot = checkDates(curr_date, prev_date, time_unit[1], frequency[1]);
 
 		if(plot)
 		{
-			System.out.println("Generating plot!");
-			System.out.println(l2.size() + " " + l3.size() + " " + iridium.size() + " " + modem.size() + " " + pumps.size() + " " + vhf.size() + " " + times.size());
-			
-			
-			// Save it
-			/*try {
-				BitmapEncoder.saveBitmap(chart, "/home/autonaut/PowerSettings", BitmapFormat.PNG);
-			} catch(IOException e) {
-			}*/
+			System.out.println("Generating CSV!");
+
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/powersettings.csv"))) {
+
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("l2");
+				sb.append(',');
+				sb.append("l3");
+				sb.append(',');
+				sb.append("iridium");
+				sb.append(',');
+				sb.append("modem");
+				sb.append(',');
+				sb.append("pumps");
+				sb.append(',');
+				sb.append("vhf");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				sb.append(date_csv);
+				sb.append(',');
+				sb.append(l2);
+				sb.append(',');
+				sb.append(l3);
+				sb.append(',');
+				sb.append(iridium);
+				sb.append(',');
+				sb.append(modem);
+				sb.append(',');
+				sb.append(pumps);
+				sb.append(',');
+				sb.append(vhf);
+				sb.append('\n');
+
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+			} catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			}
             
-            prev_date_plot = curr_date;
+            prev_date = curr_date;
 		}
     }
     

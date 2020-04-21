@@ -12,6 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.Vector;
 import java.util.*;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.FileWriter;
@@ -31,13 +33,6 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import pt.lsts.imc.net.UDPTransport;
 import pt.lsts.neptus.messages.listener.MessageInfo;
 import pt.lsts.neptus.messages.listener.MessageListener;
-
-import org.knowm.xchart.*;
-import org.knowm.xchart.BitmapEncoder.BitmapFormat;
-import org.knowm.xchart.XYSeries.*;
-import org.knowm.xchart.XYChartBuilder;
-import org.knowm.xchart.style.Styler.LegendPosition;
-import org.knowm.xchart.style.markers.SeriesMarkers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
@@ -45,35 +40,48 @@ import java.awt.Color;
 public class PlotCurrent {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
-	protected static SimpleDateFormat format = new SimpleDateFormat("[YYYY-MM-dd, HH:mm:ss] ");
+	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<Double> current = new Vector<Double>(); 
-	static Vector<Date> times = new Vector<Date>();
+	static Vector<String> current = new Vector<String>(); 
+	static Vector<String> times = new Vector<String>();
+	static Vector<String> entities_vec = new Vector<String>();
 	static Date prev_date_plot = null;
 	// Time units for saving a record and for generating a new plot.
 	static String time_unit = "minutes";
 	// Frequency for saving a record and for generating a new plot.
-    static Integer frequency = 1;
+	static Integer frequency = 1;
+	// String for influxdb.
+	static String influxdb = "--input /home/autonaut/java_to_influx/current.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname current --fieldcolumns value,entity";
     
-    static void plot(IMCMessage message){
+    static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
+		String thruster_ent = entities.get("Thruster Consumed Current");
+		Integer thruster_ent_int = Integer.parseInt(thruster_ent);
+		String sys_ent = entities.get("System Consumed Current");
+		Integer sys_ent_int = Integer.parseInt(sys_ent);
+		short entity = message.getSrcEnt();
+		String entity_to_csv = "";
+		if(entity == thruster_ent_int)
+		{
+			System.out.println("Thruster consumed current!");
+			entity_to_csv = entity_to_csv+"Thruster";
+		}
+		else if(entity == sys_ent_int)
+		{
+			System.out.println("System consumed current!");
+			entity_to_csv = entity_to_csv+"System";
+		}
 
 		boolean plot = false;
-
 		Date curr_date = message.getDate();
 
 		if(prev_date_plot == null)
 			prev_date_plot = curr_date;
 
-		String date_title = format_title.format(message.getDate());
-		String date_x_axis = format_x_axis.format(message.getDate());
+		// Get date from server.
+		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
 		System.out.println("Current record saved!");
-		Map<String, Object> values = new LinkedHashMap<String, Object>();
-		
-		values = message.getValues();
-		String key;
-		String value;
-		Double value_d;
 
 		if(current.size() == max_size_1000)
 		{
@@ -81,46 +89,60 @@ public class PlotCurrent {
 			{
 				current.remove(i);
 				times.remove(i);
+				entities_vec.remove(i);
 			}
 		}
 
-		for (Map.Entry<String, Object> entry : values.entrySet()) {
-			//System.out.println(entry.getKey() + ":" + entry.getValue().toString());
-			key = entry.getKey();
-			value = entry.getValue().toString();
-			value_d = Double.valueOf(value);
-			current.add(value_d);
-		}
+		String curr_string = message.getString("value");
+		current.add(curr_string.substring(0, curr_string.length() - 2));
+		entities_vec.add(entity_to_csv);
+		times.add(date_csv);
 
-		times.add(curr_date);
-
-		System.out.println(current.size() + " " + date_x_axis);
+		System.out.println(current.size() + " " + date_csv);
 
 		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
 
 		if(plot)
 		{
-			System.out.println("Generating plot!");
+			System.out.println("Generating CSV!");
 			System.out.println(current.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Consumed Current - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("A").build();
 
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/current.csv"))) {
 
-			chart.addSeries("voltage", times, current);
-			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/current-rt", BitmapFormat.PNG);
-			} catch(IOException e) {
-			}
+				StringBuilder sb = new StringBuilder();
+				sb.append("timestamp");
+				sb.append(',');
+				sb.append("value");
+				sb.append(',');
+				sb.append("entity");
+				sb.append('\n');
+
+				//writer.write(sb.toString());
+
+				for(int i=0; i<current.size(); i++)
+				{
+					sb.append(times.get(i));
+					sb.append(',');
+					sb.append(current.get(i));
+					sb.append(',');
+					sb.append(entities_vec.get(i));
+					sb.append('\n');
+				}
+
+				writer.write(sb.toString());
+
+				System.out.println("done!");
+
+				try {
+					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+					System.out.println("Writing to AutoNaut InfluxDB!");
+				} catch(IOException f) {
+				}
+
+
+			  } catch (FileNotFoundException e) {
+				System.out.println(e.getMessage());
+			  }
 			prev_date_plot = curr_date;
 		}
     }

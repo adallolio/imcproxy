@@ -77,7 +77,6 @@ public class PlotAcceleration {
 		
 		get_record = checkDates(curr_date, prev_date, time_unit[0], frequency[0]);
 
-		String date_title = format_title.format(message.getDate());
 		// Get date from server.
 		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
@@ -90,7 +89,6 @@ public class PlotAcceleration {
 			boolean first_it = true;
 			String key;
 			String value;
-			Double value_d;
 			ArrayList<String> xyz = new ArrayList<String>();
 
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
