@@ -207,6 +207,10 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			console("GpsFix received");
 			PlotGpsFix.plot(message);
+		} else if(temp.equals("DesiredHeading") && message.getSrc() == AutoNautL2)
+		{
+			console("DesiredHeading received");
+			PlotDesiredHeading.plot(message);
 		}
 
 	}
