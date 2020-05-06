@@ -102,41 +102,44 @@ public class PlotGpsFix {
 
             System.out.println("Generating CSV!");
 
-            // Insert location table.
-            try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/gpsfixloc.csv"))) {
+            if(sat != 0)
+            {
+                // Insert location table.
+                try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/gpsfixloc.csv"))) {
 
-                StringBuilder sb = new StringBuilder();
-                sb.append("timestamp");
-                sb.append(',');
-                sb.append("lat");
-                sb.append(',');
-                sb.append("lon");
-                sb.append(',');
-                sb.append("sat");
-                sb.append('\n');
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("timestamp");
+                    sb.append(',');
+                    sb.append("lat");
+                    sb.append(',');
+                    sb.append("lon");
+                    sb.append(',');
+                    sb.append("sat");
+                    sb.append('\n');
 
-                sb.append(date_csv);
-                sb.append(',');
-                sb.append(lat_s);
-                sb.append(',');
-                sb.append(lon_s);
-                sb.append(',');
-                sb.append(sat_s);
-                sb.append('\n');
+                    sb.append(date_csv);
+                    sb.append(',');
+                    sb.append(lat_s);
+                    sb.append(',');
+                    sb.append(lon_s);
+                    sb.append(',');
+                    sb.append(sat_s);
+                    sb.append('\n');
 
-                writer.write(sb.toString());
+                    writer.write(sb.toString());
 
-                System.out.println("done!");
+                    System.out.println("done!");
 
-                try {
-                    Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb_loc);
-                    System.out.println("Writing to AutoNaut InfluxDB!");
-                } catch(IOException f) {
+                    try {
+                        Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb_loc);
+                        System.out.println("Writing to AutoNaut InfluxDB!");
+                    } catch(IOException f) {
+                    }
+
+
+                } catch (FileNotFoundException e) {
+                    System.out.println(e.getMessage());
                 }
-
-
-            } catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
             }
 
             System.out.println("And again!");

@@ -130,29 +130,6 @@ public class PlotDesiredHeading {
 				System.out.println(e.getMessage());
 			}
 			prev_date_plot = curr_date;
-			/*
-			System.out.println("Generating plot!");
-			System.out.println(voltage.size() + " " + times.size());
-			// Create Chart
-			XYChart chart = new XYChartBuilder().width(600).height(500).title("Battery Voltage - (last update "+date_title+" at "+date_x_axis+ ")").xAxisTitle("Time").yAxisTitle("V").build();
-
-			// Customize Chart
-			chart.getStyler().setDefaultSeriesRenderStyle(XYSeriesRenderStyle.Line);
-			chart.getStyler().setChartTitleVisible(true);
-			chart.getStyler().setLegendPosition(LegendPosition.InsideSW);
-			//chart.getStyler().setYAxisLabelAlignment(Styler.TextAlignment.Right);
-			chart.getStyler().setYAxisDecimalPattern("##.##");
-			chart.getStyler().setPlotMargin(0);
-			chart.getStyler().setPlotContentSize(.95);
-
-			chart.addSeries("voltage", times, voltage);
-			
-			// Save it
-			try {
-				BitmapEncoder.saveBitmap(chart, "/var/www/dokuwiki/data/media/voltage-rt", BitmapFormat.PNG);
-			} catch(IOException e) {
-			}
-			prev_date_plot = curr_date;*/
 		}
     }
     
