@@ -211,6 +211,14 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			console("DesiredHeading received");
 			PlotDesiredHeading.plot(message);
+		} else if(temp.equals("SetServoPosition"))
+		{
+			console("SetServoPosition received");
+			PlotServoPosition.plot(message);
+		} else if(temp.equals("SetThrusterActuation"))
+		{
+			console("SetThrusterActuation received");
+			PlotThrusterActuation.plot(message);
 		}
 
 	}

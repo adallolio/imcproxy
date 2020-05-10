@@ -55,95 +55,101 @@ public class PlotCurrent {
 	static String influxdb = "--input /home/autonaut/java_to_influx/current.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname current --fieldcolumns value,entity";
     
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
-		String thruster_ent = entities.get("Thruster Consumed Current");
-		Integer thruster_ent_int = Integer.parseInt(thruster_ent);
-		String sys_ent = entities.get("System Consumed Current");
-		Integer sys_ent_int = Integer.parseInt(sys_ent);
-		short entity = message.getSrcEnt();
-		String entity_to_csv = "";
-		if(entity == thruster_ent_int)
+		if(message.getString("value").equals("NaN") || message.getString("value").equals("?"))
 		{
-			System.out.println("Thruster consumed current!");
-			entity_to_csv = entity_to_csv+"Thruster";
-		}
-		else if(entity == sys_ent_int)
-		{
-			System.out.println("System consumed current!");
-			entity_to_csv = entity_to_csv+"System";
-		}
-
-		boolean plot = false;
-		Date curr_date = message.getDate();
-
-		if(prev_date_plot == null)
-			prev_date_plot = curr_date;
-
-		// Get date from server.
-		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
-
-		System.out.println("Current record saved!");
-
-		if(current.size() == max_size_1000)
-		{
-			for(int i=0;i<max_size_1000/10;i++)
+			String thruster_ent = entities.get("Thruster Consumed Current");
+			Integer thruster_ent_int = Integer.parseInt(thruster_ent);
+			String sys_ent = entities.get("System Consumed Current");
+			Integer sys_ent_int = Integer.parseInt(sys_ent);
+			short entity = message.getSrcEnt();
+			String entity_to_csv = "";
+			if(entity == thruster_ent_int)
 			{
-				current.remove(i);
-				times.remove(i);
-				entities_vec.remove(i);
+				System.out.println("Thruster consumed current!");
+				entity_to_csv = entity_to_csv+"Thruster";
 			}
-		}
+			else if(entity == sys_ent_int)
+			{
+				System.out.println("System consumed current!");
+				entity_to_csv = entity_to_csv+"System";
+			}
 
-		String curr_string = message.getString("value");
-		current.add(curr_string.substring(0, curr_string.length() - 2));
-		entities_vec.add(entity_to_csv);
-		times.add(date_csv);
+			boolean plot = false;
+			Date curr_date = message.getDate();
 
-		System.out.println(current.size() + " " + date_csv);
+			if(prev_date_plot == null)
+				prev_date_plot = curr_date;
 
-		plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
+			// Get date from server.
+			String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
-		if(plot)
-		{
-			System.out.println("Generating CSV!");
-			System.out.println(current.size() + " " + times.size());
+			System.out.println("Current record saved!");
 
-			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/current.csv"))) {
-
-				StringBuilder sb = new StringBuilder();
-				sb.append("timestamp");
-				sb.append(',');
-				sb.append("value");
-				sb.append(',');
-				sb.append("entity");
-				sb.append('\n');
-
-				//writer.write(sb.toString());
-
-				for(int i=0; i<current.size(); i++)
+			if(current.size() == max_size_1000)
+			{
+				for(int i=0;i<max_size_1000/10;i++)
 				{
-					sb.append(times.get(i));
+					current.remove(i);
+					times.remove(i);
+					entities_vec.remove(i);
+				}
+			}
+
+			String curr_string = message.getString("value");
+			current.add(curr_string.substring(0, curr_string.length() - 2));
+			entities_vec.add(entity_to_csv);
+			times.add(date_csv);
+
+			System.out.println(current.size() + " " + date_csv);
+
+			plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
+
+			if(plot)
+			{
+				System.out.println("Generating CSV!");
+				System.out.println(current.size() + " " + times.size());
+
+				try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/current.csv"))) {
+
+					StringBuilder sb = new StringBuilder();
+					sb.append("timestamp");
 					sb.append(',');
-					sb.append(current.get(i));
+					sb.append("value");
 					sb.append(',');
-					sb.append(entities_vec.get(i));
+					sb.append("entity");
 					sb.append('\n');
+
+					//writer.write(sb.toString());
+
+					for(int i=0; i<current.size(); i++)
+					{
+						sb.append(times.get(i));
+						sb.append(',');
+						sb.append(current.get(i));
+						sb.append(',');
+						sb.append(entities_vec.get(i));
+						sb.append('\n');
+					}
+
+					writer.write(sb.toString());
+
+					System.out.println("done!");
+
+					try {
+						Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
+						System.out.println("Writing to AutoNaut InfluxDB!");
+					} catch(IOException f) {
+					}
+
+
+				} catch (FileNotFoundException e) {
+					System.out.println(e.getMessage());
 				}
-
-				writer.write(sb.toString());
-
-				System.out.println("done!");
-
-				try {
-					Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdb);
-					System.out.println("Writing to AutoNaut InfluxDB!");
-				} catch(IOException f) {
-				}
-
-
-			  } catch (FileNotFoundException e) {
-				System.out.println(e.getMessage());
-			  }
-			prev_date_plot = curr_date;
+				prev_date_plot = curr_date;
+				current.clear();
+				entities_vec.clear();
+				times.clear();
+			}
 		}
     }
     
