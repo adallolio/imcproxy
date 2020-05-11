@@ -55,7 +55,7 @@ public class PlotCurrent {
 	static String influxdb = "--input /home/autonaut/java_to_influx/current.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname current --fieldcolumns value,entity";
     
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
-		if(message.getString("value").equals("NaN") || message.getString("value").equals("?"))
+		if(!message.getString("value").equals("NaN") && !message.getString("value").equals("?"))
 		{
 			String thruster_ent = entities.get("Thruster Consumed Current");
 			Integer thruster_ent_int = Integer.parseInt(thruster_ent);

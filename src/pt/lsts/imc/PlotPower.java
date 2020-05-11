@@ -43,7 +43,8 @@ public class PlotPower {
 	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<String> power = new Vector<String>(); 
+	static Vector<String> power = new Vector<String>();
+	static Vector<String> hosts = new Vector<String>();
 	static Vector<String> times = new Vector<String>();
 	static Vector<String> entities_vec = new Vector<String>();
 	static Date prev_date_plot = null;
@@ -52,10 +53,13 @@ public class PlotPower {
 	// Frequency for saving a record and for generating a new plot.
 	static Integer frequency = 1;
 	// String for influxdb.
-	static String influxdb = "--input /home/autonaut/java_to_influx/power.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname power --fieldcolumns value,entity";
+	static String influxdb = "--input /home/autonaut/java_to_influx/power.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname power --fieldcolumns value,entity --tagcolumns what";
+	static boolean panels = false;
+	static boolean system = false;
+	static boolean thruster = false;
     
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
-		if(message.getString("value").equals("NaN") || message.getString("value").equals("?"))
+		if(!message.getString("value").equals("NaN") && !message.getString("value").equals("?"))
 		{
 			String thruster_ent = entities.get("Thruster Consumed Power");
 			Integer thruster_ent_int = Integer.parseInt(thruster_ent);
@@ -63,6 +67,7 @@ public class PlotPower {
 			Integer sys_ent_int = Integer.parseInt(sys_ent);
 			String panels_ent = entities.get("Panels Power");
 			Integer panels_ent_int = Integer.parseInt(panels_ent);
+			String host="";
 			
 			short entity = message.getSrcEnt();
 			String entity_to_csv = "";
@@ -70,14 +75,17 @@ public class PlotPower {
 			{
 				System.out.println("Thruster consumed power!");
 				entity_to_csv = entity_to_csv+"Thruster";
+				host=host+"T";
 			} else if(entity == sys_ent_int)
 			{
 				System.out.println("System consumed power!");
 				entity_to_csv = entity_to_csv+"System";
+				host=host+"S";
 			} else if(entity == panels_ent_int)
 			{
 				System.out.println("Panels produced power!");
 				entity_to_csv = entity_to_csv+"Panels";
+				host=host+"P";
 			}
 
 			boolean plot = false;
@@ -99,10 +107,12 @@ public class PlotPower {
 					power.remove(i);
 					times.remove(i);
 					entities_vec.remove(i);
+					hosts.remove(i);
 				}
 			}
 
 			power.add(message.getString("value"));
+			hosts.add(host);
 			times.add(date_csv);
 			entities_vec.add(entity_to_csv);
 
@@ -123,6 +133,8 @@ public class PlotPower {
 					sb.append("value");
 					sb.append(',');
 					sb.append("entity");
+					sb.append(',');
+					sb.append("what");
 					sb.append('\n');
 
 					//writer.write(sb.toString());
@@ -134,6 +146,8 @@ public class PlotPower {
 						sb.append(power.get(i));
 						sb.append(',');
 						sb.append(entities_vec.get(i));
+						sb.append(',');
+						sb.append(hosts.get(i));
 						sb.append('\n');
 					}
 
@@ -155,6 +169,7 @@ public class PlotPower {
 				times.clear();
 				power.clear();
 				entities_vec.clear();
+				hosts.clear();
 			}
 		}
     }
