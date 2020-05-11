@@ -198,11 +198,11 @@ public class ImcProxyPlot extends ImcClientSocket {
 		} else if(temp.equals("Temperature") && message.getSrc() == AutoNautL2 && L2entities_arrived)
 		{
 			console("Temperature L2 received");
-			PlotTemperature.plot(message,AutoNautL2_entities);
+			PlotTemperatureL2.plot(message,AutoNautL2_entities);
 		} else if(temp.equals("Temperature") && message.getSrc() == AutoNautL3 && L3entities_arrived)
 		{
 			console("Temperature L3 received");
-			PlotTemperature.plot(message,AutoNautL3_entities);
+			PlotTemperatureL3.plot(message,AutoNautL3_entities);
 		} else if(temp.equals("GpsFix") && message.getSrc() == AutoNautL2)
 		{
 			console("GpsFix received");
