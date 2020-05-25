@@ -146,6 +146,9 @@ public class PlotTemperatureL2 {
 				System.out.println(e.getMessage());
 			}
 			prev_date_plot = curr_date;
+			temperaturel2.clear();
+			times.clear();
+			entities_vec.clear();
 		}
     }
     

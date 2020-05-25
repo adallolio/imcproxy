@@ -43,7 +43,6 @@ public class PlotTemperatureL3 {
 	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
 	// Maximum record vector size - moving window.
 	static Integer max_size_1000 = 1000;
-	static Vector<String> temperaturel2 = new Vector<String>(); 
 	static Vector<String> temperaturel3 = new Vector<String>(); 
 	static Vector<String> times = new Vector<String>();
 	static Vector<String> entities_vec = new Vector<String>();
@@ -60,6 +59,8 @@ public class PlotTemperatureL3 {
         Integer ctd_ent_int = Integer.parseInt(ctd_ent);
         String opt_ent = entities.get("Optode4385 Temperature");
         Integer opt_ent_int = Integer.parseInt(opt_ent);
+        String tblive_ent = entities.get("TBLive");
+        Integer tblive_ent_int = Integer.parseInt(tblive_ent);
 
         short entity = message.getSrcEnt();
         String entity_to_csv = "";
@@ -71,81 +72,91 @@ public class PlotTemperatureL3 {
         {
             System.out.println("Optode Temperature!");
             entity_to_csv = entity_to_csv+"optode";
+        } else if(entity == tblive_ent_int)
+        {
+            System.out.println("TBLive Temperature!");
+            entity_to_csv = entity_to_csv+"tblive";
         }
 
-        boolean plot = false;
-
-        Date curr_date = message.getDate();
-
-        if(prev_date_plot == null)
-            prev_date_plot = curr_date;
-
-        // Get date from server.
-        String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
-
-        System.out.println("Temperature record saved!");
-        
-        if(temperaturel3.size() == max_size_1000)
+        if(entity == ctd_ent_int || entity == opt_ent_int || entity == tblive_ent_int)
         {
-            for(int i=0;i<max_size_1000/10;i++)
+            boolean plot = false;
+
+            Date curr_date = message.getDate();
+
+            if(prev_date_plot == null)
+                prev_date_plot = curr_date;
+
+            // Get date from server.
+            String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
+
+            System.out.println("Temperature record saved!");
+            
+            if(temperaturel3.size() == max_size_1000)
             {
-                temperaturel3.remove(i);
-                times.remove(i);
-                entities_vec.remove(i);
-            }
-        }
-
-        String temp_string = message.getString("value");
-        temperaturel3.add(temp_string.substring(0, temp_string.length() - 4));
-        times.add(date_csv);
-        entities_vec.add(entity_to_csv);
-
-        System.out.println(temperaturel3.size() + " " + date_csv);
-
-        plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
-
-        if(plot)
-        {
-            System.out.println("L3 Temperature CSV!");
-            System.out.println(temperaturel3.size() + " " + times.size());
-
-            try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/temperaturel3.csv"))) {
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("timestamp");
-                sb.append(',');
-                sb.append("value");
-                sb.append(',');
-                sb.append("entity");
-                sb.append('\n');
-
-                //writer.write(sb.toString());
-
-                for(int i=0; i<temperaturel3.size(); i++)
+                for(int i=0;i<max_size_1000/10;i++)
                 {
-                    sb.append(times.get(i));
-                    sb.append(',');
-                    sb.append(temperaturel3.get(i));
-                    sb.append(',');
-                    sb.append(entities_vec.get(i));
-                    sb.append('\n');
+                    temperaturel3.remove(i);
+                    times.remove(i);
+                    entities_vec.remove(i);
                 }
-
-                writer.write(sb.toString());
-
-                System.out.println("done!");
-
-                try {
-                    Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdbl3);
-                    System.out.println("Writing to AutoNaut InfluxDB!");
-                } catch(IOException f) {
-                }
-
-
-            } catch (FileNotFoundException e) {
-                System.out.println(e.getMessage());
             }
-            prev_date_plot = curr_date;
+
+            String temp_string = message.getString("value");
+            temperaturel3.add(temp_string.substring(0, temp_string.length() - 4));
+            times.add(date_csv);
+            entities_vec.add(entity_to_csv);
+
+            System.out.println(temperaturel3.size() + " " + date_csv);
+
+            plot = checkDates(curr_date, prev_date_plot, time_unit, frequency);
+
+            if(plot)
+            {
+                System.out.println("L3 Temperature CSV!");
+                System.out.println(temperaturel3.size() + " " + times.size());
+
+                try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/temperaturel3.csv"))) {
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("timestamp");
+                    sb.append(',');
+                    sb.append("value");
+                    sb.append(',');
+                    sb.append("entity");
+                    sb.append('\n');
+
+                    //writer.write(sb.toString());
+
+                    for(int i=0; i<temperaturel3.size(); i++)
+                    {
+                        sb.append(times.get(i));
+                        sb.append(',');
+                        sb.append(temperaturel3.get(i));
+                        sb.append(',');
+                        sb.append(entities_vec.get(i));
+                        sb.append('\n');
+                    }
+
+                    writer.write(sb.toString());
+
+                    System.out.println("done!");
+
+                    try {
+                        Process p = Runtime.getRuntime().exec("python /home/autonaut/java_to_influx/csv-to.py "+influxdbl3);
+                        System.out.println("Writing to AutoNaut InfluxDB!");
+                    } catch(IOException f) {
+                    }
+
+
+                } catch (FileNotFoundException e) {
+                    System.out.println(e.getMessage());
+                }
+                prev_date_plot = curr_date;
+                temperaturel3.clear();
+                times.clear();
+                entities_vec.clear();
+            }
         }
     }
     
