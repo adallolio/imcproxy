@@ -219,6 +219,14 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			console("SetThrusterActuation received");
 			PlotThrusterActuation.plot(message);
+		} else if(temp.equals("TBRFishTag"))
+		{
+			console("TBRFishTag received");
+			PlotTBRFishTag.plot(message);
+		} else if(temp.equals("TBRSensor"))
+		{
+			console("TBRSensor received");
+			PlotTBRSensor.plot(message);
 		}
 
 	}
