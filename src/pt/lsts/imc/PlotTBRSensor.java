@@ -50,6 +50,7 @@ public class PlotTBRSensor {
         String serial_no = message.getString("serial_no");
         String unix_tmst = message.getString("unix_timestamp");
         String temp = message.getString("temperature");
+        temp = temp.substring(0, temp.length() - 4);
         String avg_noise_lev = message.getString("avg_noise_level");
         String peak_noise_lev = message.getString("peak_noise_level");
         String rcv_freq = message.getString("recv_listen_freq");

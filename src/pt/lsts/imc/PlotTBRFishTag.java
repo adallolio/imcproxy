@@ -40,7 +40,7 @@ import java.awt.Color;
 public class PlotTBRFishTag {
 	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
     // String for influxdb.
-	static String influxdb = "--input /home/autonaut/java_to_influx/tbrtag.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname tbrtag --fieldcolumns serial_no,unix_timestamp,millis,trans_protocol,trans_id,trans_data,snr,trans_freq,recv_mem_addr";
+	static String influxdb = "--input /home/autonaut/java_to_influx/tbrtag.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname tbrtag --fieldcolumns serial_no,unix_timestamp,millis,trans_protocol,trans_id,trans_data,snr,trans_freq,recv_mem_addr,lat,lon";
 	
     static void plot(IMCMessage message){
         // Get date from server.
@@ -50,12 +50,18 @@ public class PlotTBRFishTag {
         String serial_no = message.getString("serial_no");
         String unix_tmst = message.getString("unix_timestamp");
         String millis = message.getString("millis");
+        millis = millis.substring(0, millis.length() - 3);
         String trans_protocol = message.getString("trans_protocol");
         String trans_id = message.getString("trans_id");
         String trans_data = message.getString("trans_data");
         String snr = message.getString("SNR");
+        snr = snr.substring(0, snr.length() - 3);
         String trans_freq = message.getString("trans_freq");
         String recv_mem_addr = message.getString("recv_mem_addr");
+        double lat = message.getDouble("lat");
+        double lon = message.getDouble("lon");
+        String lat_s = Double.toString(lat*(180.0/Math.PI));
+        String lon_s = Double.toString(lon*(180.0/Math.PI));
         System.out.println("TBRFishTag CSV!");
 
         try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/tbrtag.csv"))) {
@@ -79,7 +85,11 @@ public class PlotTBRFishTag {
             sb.append(',');
             sb.append("trans_freq");
             sb.append(',');
-            sb.append("rcv_mem_addr");
+            sb.append("recv_mem_addr");
+            sb.append(',');
+            sb.append("lat");
+            sb.append(',');
+            sb.append("lon");
             sb.append('\n');
 
             //writer.write(sb.toString());
@@ -103,6 +113,10 @@ public class PlotTBRFishTag {
             sb.append(trans_freq);
             sb.append(',');
             sb.append(recv_mem_addr);
+            sb.append(',');
+            sb.append(lat_s);
+            sb.append(',');
+            sb.append(lon_s);
             sb.append('\n');
 
             writer.write(sb.toString());
