@@ -167,10 +167,10 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			console("Heave received");
 			PlotHeave.plot(message);
-		} else if(temp.equals("OpticalBackscatter"))
+		} else if(temp.equals("Turbidity"))
 		{
-			console("OpticalBackscatter received");
-			PlotOpticalBackscatter.plot(message);
+			console("Turbidity received");
+			PlotTurbidity.plot(message);
 		} else if(temp.equals("Power") && L2entities_arrived)
 		{
 			console("Power received");

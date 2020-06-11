@@ -46,7 +46,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Color;
 
-public class PlotOpticalBackscatter {
+public class PlotTurbidity {
     static SimpleDateFormat format_title = new SimpleDateFormat("dd-M-yyyy");
 	static SimpleDateFormat format_x_axis = new SimpleDateFormat("HH:mm:ss");
 	protected static SimpleDateFormat format = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
@@ -60,7 +60,7 @@ public class PlotOpticalBackscatter {
 	// Frequency for saving a record and for generating a new plot.
 	static Integer frequency = 1;
 	// String for influxdb.
-	static String influxdb = "--input /home/autonaut/java_to_influx/opticalback.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname opticalback --fieldcolumns value";
+	static String influxdb = "--input /home/autonaut/java_to_influx/turbidity.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname turbidity --fieldcolumns value";
     
     static void plot(IMCMessage message){
 
@@ -75,7 +75,7 @@ public class PlotOpticalBackscatter {
 		// Get date from server.
 		String date_csv = format.format(new Date()); // get date from message: format.format(message.getDate());
 
-		System.out.println("OpticalBackscatter record saved!");
+		System.out.println("Turbidity record saved!");
 		Map<String, Object> values = new LinkedHashMap<String, Object>();
 		
 		values = message.getValues();
@@ -109,7 +109,7 @@ public class PlotOpticalBackscatter {
 			System.out.println("Generating CSV!");
 			System.out.println(bs.size() + " " + times.size());
 
-			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/opticalback.csv"))) {
+			try (PrintWriter writer = new PrintWriter(new File("/home/autonaut/java_to_influx/turbidity.csv"))) {
 
 				StringBuilder sb = new StringBuilder();
 				sb.append("timestamp");
