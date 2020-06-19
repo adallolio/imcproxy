@@ -58,7 +58,7 @@ public class PlotTemperatureL2 {
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
 		String int_ent = entities.get("STB - ADIS");
 		Integer int_ent_int = Integer.parseInt(int_ent);
-		String ext_ent = entities.get("Weather Station Temperature");
+		String ext_ent = entities.get("AirMar120WX");
 		Integer ext_ent_int = Integer.parseInt(ext_ent);
 
 		short entity = message.getSrcEnt();
