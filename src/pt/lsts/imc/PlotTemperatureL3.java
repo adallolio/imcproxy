@@ -55,9 +55,9 @@ public class PlotTemperatureL3 {
 	static String influxdbl3 = "--input /home/autonaut/java_to_influx/temperaturel3.csv --user autonaut --password ntnu_autonaut --dbname AUTONAUT --metricname temperaturel3 --fieldcolumns value,entity";
 	
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
-		String ctd_ent = entities.get("SBE49FastCAT CTD Temperature");
+		String ctd_ent = entities.get("SBE49FastCAT CTD");
         Integer ctd_ent_int = Integer.parseInt(ctd_ent);
-        String opt_ent = entities.get("Optode4385 Temperature");
+        String opt_ent = entities.get("Optode4385");
         Integer opt_ent_int = Integer.parseInt(opt_ent);
         String tblive_ent = entities.get("TBLive");
         Integer tblive_ent_int = Integer.parseInt(tblive_ent);
