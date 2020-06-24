@@ -57,7 +57,7 @@ public class PlotTemperatureL3 {
     static void plot(IMCMessage message, LinkedHashMap<String, String> entities){
 		String ctd_ent = entities.get("SBE49FastCAT CTD");
         Integer ctd_ent_int = Integer.parseInt(ctd_ent);
-        String opt_ent = entities.get("Optode4385");
+        String opt_ent = entities.get("Optode4835");
         Integer opt_ent_int = Integer.parseInt(opt_ent);
         String tblive_ent = entities.get("TBLive");
         Integer tblive_ent_int = Integer.parseInt(tblive_ent);
