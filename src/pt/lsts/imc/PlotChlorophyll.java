@@ -140,6 +140,8 @@ public class PlotChlorophyll {
 				System.out.println(e.getMessage());
 			}
 			prev_date_plot = curr_date;
+            chlorophyll.clear();
+			times.clear();
 
 			/*
 			System.out.println("Generating plot!");
