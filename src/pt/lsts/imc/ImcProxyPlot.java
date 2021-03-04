@@ -50,7 +50,7 @@ public class ImcProxyPlot extends ImcClientSocket {
 	public List<String> toSave = Arrays.asList("Acceleration", "AirSaturation", "AngularVelocity", "Chlorophyll", "Conductivity", "CpuUsage", "Current", "Depth", "DesiredHeading",
 												"DesiredSpeed", "DissolvedOrganicMatter", "DissolvedOxygen", "EstimatedFreq", "EstimatedState", "EulerAngles", "GpsFix", "Heartbeat",
 												"Heave", "OpticalBackscatter", "Power", "PowerSettings", "Pressure", "RelativeWind", "AbsoluteWind", "Salinity", "SoundSpeed",
-												"StorageUsage", "Temperature", "Voltage", "PAR");
+												"StorageUsage", "Temperature", "Voltage", "PAR", "SingleCurrentCell");
 	public int AutoNautL2 = 34819;
 	public int AutoNautL3 = 34820;
 	public LinkedHashMap<String, String> AutoNautL2_entities = new LinkedHashMap<String, String>();
@@ -231,6 +231,10 @@ public class ImcProxyPlot extends ImcClientSocket {
 		{
 			console("PAR received");
 			PlotPAR.plot(message);
+		} else if(temp.equals("SingleCurrentCell"))
+		{
+			console("SingleCurrentCell received");
+			PlotADCP.plot(message);
 		}
 
 	}
